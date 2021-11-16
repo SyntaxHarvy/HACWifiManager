@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "HACIOTCorePIO",
+			"path": "..\\HACIOTCore\\HACIOTCorePIO"
+		},
+		{
+			"name": "AMPWifiManagerPIO",
+			"path": "..\\AMPWifiLibrary\\AMPWifiManagerPIO"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"xlocale": "cpp",
+			"xstring": "cpp",
+			"string_view": "cpp",
+			"functional": "cpp",
+			"atomic": "cpp",
+			"typeinfo": "cpp",
+			"xmemory": "cpp",
+			"xutility": "cpp",
+			"bit": "cpp",
+			"array": "cpp",
+			"deque": "cpp",
+			"list": "cpp",
+			"map": "cpp",
+			"*.tcc": "cpp",
+			"set": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"algorithm": "cpp"
+		}
+	}
+}
