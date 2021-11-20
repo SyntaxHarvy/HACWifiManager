@@ -10,6 +10,10 @@
 		{
 			"name": "AMPWifiManagerPIO",
 			"path": "..\\AMPWifiLibrary\\AMPWifiManagerPIO"
+		},
+		{
+			"name": "HaCWifiManagerPIO",
+			"path": "HaCWifiManagerPIO"
 		}
 	],
 	"settings": {
