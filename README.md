@@ -1,5 +1,5 @@
-# AMPWifiManager
-Arduino Maker Philippines Wifi Manager
+# HACWifiManager
+Wifi Manager
 
 ## Features
 1. Station Mode
