@@ -34,12 +34,31 @@
 //typedef std::function<void()> tListGenCbFnHaCSub;                      // Standard void function with non-return value
 typedef std::function<void(const char *)> tListGenCbFnHaC1StrParamSub; // Standard void function with non-return value
 
+
 /* #endregion */
 
 
 /* #region CLASS_DECLARATION */
 class HACWifiManagerParameters{                                   
     public:
+
+        typedef struct WifiInfo {
+            String ssid;		
+            String pass;
+        } t_wifiInfo;
+
+        typedef struct NetworkInfo {
+            String ip;		
+            String sn;
+            String gw;
+            String pdns;
+            String sdns;
+        } t_networkInfo;
+
+        std::vector<t_wifiInfo> wifiInfo;
+        t_wifiInfo accessPointInfo;
+        t_networkInfo networkInfo;
+
         HACWifiManagerParameters();                         // Constructor
         ~HACWifiManagerParameters();                        // Desctructor
         void fromJson(const char *jsonStr);                 // Accept json string and convert it to HACWifiManagerParameters class
@@ -77,30 +96,15 @@ class HACWifiManagerParameters{
             * The maximum number of the list will be limited by MAX_WIFI_INFO_LIST.
             * @param 
         */
-        typedef struct WifiInfo {
-            String ssid;		
-            String pass;
-        } t_wifiInfo;
-
-        typedef struct NetworkInfo {
-            String ip;		
-            String sn;
-            String gw;
-            String pdns;
-            String sdns;
-        } t_networkInfo;
-
-
-        std::vector<t_wifiInfo> _wifiInfo;
-        t_networkInfo _networkInfo;
         uint8_t _mode;
         bool _multiWifiEnable;
         bool _dhcpNetworkEnable;
         uint8_t _totalWifiList;
-
-        tListGenCbFnHaC1StrParamSub _onDebugFn;                        // Function callback declaration for debug event
-        void _debug(const char *data);                              // Function prototype declaration for debug function
         
+        tListGenCbFnHaC1StrParamSub _onDebugFn;                        // Function callback declaration for debug event
+        
+        void _debug(const char *data);                              // Function prototype declaration for debug function
+
 };
 
 /* #endregion */
