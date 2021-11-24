@@ -6,7 +6,6 @@
 /* #region Debug */
 #define HAC_DEBUG_PREFIX "[HACWIFIMANAGER]"
 
-
 #ifdef DEBUG_ESP_PORT
 
 #define DEBUG_HAC_WIFI Serial // Custom serial debug
@@ -109,17 +108,23 @@ public:
     void setNetworkSdns(const char *sdns);
     String getNetworkSdns();
 
+    void shutdownAP();
+    void shutdownSTA();
+    void shutdown();
+
     // Event Function Declaration
     void onDebug(tListGenCbFnHaC1StrParam fn);      // Debug related events
     void onError(tListGenCbFnHaC1StrParam fn);      // Error related events
-    void onReady(tListGenCbFnHaC1StrParam fn);      // Event called when wifi successfully setup
-    void onDisconnect(tListGenCbFnHaC1StrParam fn); // Event called when wifi loss connection for
-    void onServiceLoop(tListGenCbFnHaC1StrParam fn);
-    // either Access point or Station mode
-    void onReconnect(tListGenCbFnHaC fn); // Event called when wifi establishing connection
-    void onStaMode(tListGenCbFnHaC fn);   // Event called when wifi established on station mode
-    void onAPMode(tListGenCbFnHaC fn);    // Event called when wifi established on Access
-                                          // point mode
+    void onSTAReady(tListGenCbFnHaC1StrParam fn);      // Event called when wifi successfully setup
+    void onSTADisconnect(tListGenCbFnHaC1StrParam fn); // Event called when wifi loss connection for
+    void onSTALoop(tListGenCbFnHaC1StrParam fn);    // either Access point or Station mode
+    void onAPReady(tListGenCbFnHaC1StrParam fn);      // Event called when wifi successfully setup
+    void onAPDisconnect(tListGenCbFnHaC1StrParam fn); // Event called when wifi loss connection for
+    void onAPLoop(tListGenCbFnHaC1StrParam fn);    // either Access point or Station mode
+    void onReconnect(tListGenCbFnHaC fn);           // Event called when wifi establishing connection
+    void onStaMode(tListGenCbFnHaC fn);             // Event called when wifi established on station mode
+    void onAPMode(tListGenCbFnHaC fn);              // Event called when wifi established on Access
+                                                    // point mode
 private:
     /**
             * Class which is the data holder of the HACWifiManager            
@@ -129,20 +134,24 @@ private:
     HACWifiManagerParameters _wifiParam;       // Private declaration of AMPWifiManagerData
     tListGenCbFnHaC1StrParam _onDebugFn;       // Function callback declaration for onDebug event
     tListGenCbFnHaC1StrParam _onErrorFn;       // Function callback declaration for onError event
-    tListGenCbFnHaC1StrParam _onReadyFn;       // Function callback declaration for onready event
-    tListGenCbFnHaC1StrParam _onDisconnectFn;  // Function callback declaration for onDisconnect event
-    tListGenCbFnHaC1StrParam _onServiceLoopFn; // Function callback declaration for onServiceLoop event
+    tListGenCbFnHaC1StrParam _onSTAReadyFn;       // Function callback declaration for onready event
+    tListGenCbFnHaC1StrParam _onSTADisconnectFn;  // Function callback declaration for onDisconnect event
+    tListGenCbFnHaC1StrParam _onSTALoopFn; // Function callback declaration for onServiceLoop event
+    tListGenCbFnHaC1StrParam _onAPReadyFn;       // Function callback declaration for onready event
+    tListGenCbFnHaC1StrParam _onAPDisconnectFn;  // Function callback declaration for onDisconnect event
+    tListGenCbFnHaC1StrParam _onAPLoopFn; // Function callback declaration for onServiceLoop event
     tListGenCbFnHaC _onReconnectFn;            // Function callback declaration for onReconnect event
     tListGenCbFnHaC _onStaModeFn;              // Function callback declaration for onStaMode event
     tListGenCbFnHaC _onAPModeFn;               // Function callback declaration for onAPMode event
 
-    bool _onReadyStateFlagOnce = false;
+    bool _onReadyStateSTAFlagOnce = false;
+    bool _onReadyStateAPFlagOnce = false;
+    bool _apFlagStarted = false;
     bool _manualNetworkSetupSuccess = false;
     enum WifiMode _wifiMode; // Enum Wifi Mode
     char _defaultAccessPointID[132];
     char _defaultAccessPointPass[132];
     char _wifiMacAddress[128];
-
 
     void _debug(const char *data); // Function prototype declaration for debug function
     void _printError(uint8_t errorCode);

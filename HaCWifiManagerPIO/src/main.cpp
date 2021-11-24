@@ -8,7 +8,7 @@ HaCWifiManager gHaCWifiManager;
 
 static const char wifidata[] PROGMEM =
   R"(   {
-       "mode" : 2,
+       "mode" : 3,
        "enable_multi_wifi" : true,
        "enable_dhcp_network" : true,
        "wifilist" : {
@@ -37,20 +37,34 @@ void setup() {
     Serial.println(msg);
   });
 
-  gHaCWifiManager.onReady([&](const char *ssid){
-    Serial.println("onReady event => MCU connected to wifi " + String(ssid));
-  });
+ 
 
    gHaCWifiManager.onError([&](const char *errCode){
     Serial.println("onError event => Error Code  " + String(errCode));
   });
 
-  gHaCWifiManager.onDisconnect([&](const char *ssid){
+  gHaCWifiManager.onSTAReady([&](const char *ssid){
+    Serial.println("onReady event => MCU connected to wifi " + String(ssid));
+  });
+
+  gHaCWifiManager.onSTADisconnect([&](const char *ssid){
     Serial.println("onDisconnect event => Wifi " + String(ssid) + " disconnected");
   });
 
-  gHaCWifiManager.onServiceLoop([&](const char *json){
-    Serial.println("onServiceLoop event => " + String(json));
+  gHaCWifiManager.onSTALoop([&](const char *json){
+    //Serial.println("onServiceLoop event => " + String(json));
+  });
+
+  gHaCWifiManager.onAPReady([&](const char *ssid){
+    Serial.println("onAPReady event " + String(ssid));
+  });
+
+  gHaCWifiManager.onAPDisconnect([&](const char *ssid){
+    Serial.println("onAPDisconnect event " + String(ssid));
+  });
+
+  gHaCWifiManager.onAPLoop([&](const char *json){
+    //Serial.println("onAPLoop event => " + String(json));
   });
 
   gHaCWifiManager.setup(String(wifidata).c_str());

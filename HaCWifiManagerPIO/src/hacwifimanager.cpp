@@ -123,32 +123,82 @@ WifiMode HaCWifiManager::getMode()
 }
 
 /**
+     * Shutdown Wifi Station.          
+     */
+void HaCWifiManager::shutdownSTA()
+{
+     WiFi.disconnect();  
+     WiFi.mode(WIFI_OFF);
+     WiFi.forceSleepBegin();
+     
+}
+
+
+/**
+     * Shutdown Wifi Access Point.          
+     */
+void HaCWifiManager::shutdownAP()
+{
+     WiFi.softAPdisconnect(true);
+     this->_apFlagStarted = false;     
+}
+
+/**
+     * Shutdown Wifi manager.          
+     */
+void HaCWifiManager::shutdown()
+{
+     this->shutdownSTA();
+     this->shutdownAP();
+}
+
+/**
      * Loop routine of the library.
      * Note: loop routine      
      * @param none
      */
 void HaCWifiManager::loop()
 {
-     //Wifi onReady event
-     if (WiFi.status() == WL_CONNECTED && !this->_onReadyStateFlagOnce)
+     //Wifi Station onReady event
+     if (WiFi.status() == WL_CONNECTED && !this->_onReadyStateSTAFlagOnce)
      {
-          if (this->_onReadyFn)
-               this->_onReadyFn(WiFi.SSID().c_str());
-          this->_onReadyStateFlagOnce = true;
+          if (this->_onSTAReadyFn)
+               this->_onSTAReadyFn(WiFi.SSID().c_str());
+          this->_onReadyStateSTAFlagOnce = true;
      }
-     //Wifi onDisconnect event
-     if (WiFi.status() != WL_CONNECTED && this->_onReadyStateFlagOnce)
+     //Wifi station onDisconnect event
+     if (WiFi.status() != WL_CONNECTED && this->_onReadyStateSTAFlagOnce)
      {
-          if (this->_onDisconnectFn)
-               this->_onDisconnectFn(WiFi.SSID().c_str());
-          this->_onReadyStateFlagOnce = false;
+          if (this->_onSTADisconnectFn)
+               this->_onSTADisconnectFn(WiFi.SSID().c_str());
+          this->_onReadyStateSTAFlagOnce = false;
      }
-     //Wifi onServiceLoop event
-     if (this->_onReadyStateFlagOnce)
+     //Wifi onSTATLoop event
+     if (this->_onReadyStateSTAFlagOnce)
      {
           //TO DO: Pass json data for the status of the STA
-          if (this->_onServiceLoopFn)
-               this->_onServiceLoopFn("Wifi loop");
+          if (this->_onSTALoopFn)
+               this->_onSTALoopFn("Wifi loop");
+     }
+     //Access point onReady event
+     if(this->_apFlagStarted && !this->_onReadyStateAPFlagOnce){
+          this->_onReadyStateAPFlagOnce = true;
+          //TO DO: Pass json data for the status of the STA
+          if (this->_onAPReadyFn)
+               this->_onAPReadyFn("Wifi loop");
+     }
+     //Access point onDisconnect event
+     if(!this->_apFlagStarted && this->_onReadyStateAPFlagOnce){
+          this->_onReadyStateAPFlagOnce = false;
+          //TO DO: Pass json data for the status of the STA
+          if (this->_onAPDisconnectFn)
+               this->_onAPDisconnectFn("Wifi loop");
+     }
+     //Access point onAPLoop event
+     if(this->_onReadyStateAPFlagOnce){
+          //TO DO: Pass json data for the status of the STA
+          if (this->_onAPLoopFn)
+               this->_onAPLoopFn("Wifi loop");
      }
 }
 
@@ -177,19 +227,9 @@ void HaCWifiManager::onError(tListGenCbFnHaC1StrParamSub fn)
      * @param fn Standard non return function with a const * char parameter.
      */
 
-void HaCWifiManager::onReady(tListGenCbFnHaC1StrParamSub fn)
+void HaCWifiManager::onSTAReady(tListGenCbFnHaC1StrParamSub fn)
 {
-     this->_onReadyFn = fn;
-}
-
-/**
-     * On Service Loop Callback function.           
-     * @param fn Standard non return function with a const * char parameter.
-     */
-
-void HaCWifiManager::onServiceLoop(tListGenCbFnHaC1StrParamSub fn)
-{
-     this->_onServiceLoopFn = fn;
+     this->_onSTAReadyFn = fn;
 }
 
 /**
@@ -197,9 +237,49 @@ void HaCWifiManager::onServiceLoop(tListGenCbFnHaC1StrParamSub fn)
      * @param fn Standard non return function with a const * char parameter.
      */
 
-void HaCWifiManager::onDisconnect(tListGenCbFnHaC1StrParamSub fn)
+void HaCWifiManager::onSTADisconnect(tListGenCbFnHaC1StrParamSub fn)
 {
-     this->_onDisconnectFn = fn;
+     this->_onSTADisconnectFn = fn;
+}
+
+/**
+     * On Station mode Loop Callback function.           
+     * @param fn Standard non return function with a const * char parameter.
+     */
+
+void HaCWifiManager::onSTALoop(tListGenCbFnHaC1StrParamSub fn)
+{
+     this->_onSTALoopFn = fn;
+}
+
+/**
+     * On AP ready Callback function.           
+     * @param fn Standard non return function with a const * char parameter.
+     */
+
+void HaCWifiManager::onAPReady(tListGenCbFnHaC1StrParamSub fn)
+{
+     this->_onAPReadyFn = fn;
+}
+
+/**
+     * On AP disconnect Callback function.           
+     * @param fn Standard non return function with a const * char parameter.
+     */
+
+void HaCWifiManager::onAPDisconnect(tListGenCbFnHaC1StrParamSub fn)
+{
+     this->_onSTADisconnectFn = fn;
+}
+
+/**
+     * On AP mode Loop Callback function.           
+     * @param fn Standard non return function with a const * char parameter.
+     */
+
+void HaCWifiManager::onAPLoop(tListGenCbFnHaC1StrParamSub fn)
+{
+     this->_onAPLoopFn = fn;
 }
 
 /**
@@ -268,6 +348,21 @@ void HaCWifiManager::_setupSingleWifi(bool isStartUp)
           }
           break;
      case BOTH_STA_AP:
+          //WiFi.softAPdisconnect(true);
+          //WiFi.forceSleepBegin();
+          //WiFi.disconnect(); 
+
+          WiFi.mode(WIFI_AP_STA);          
+          if (isStartUp)
+          {               
+               delay(1000);
+               this->_setupStation(this->_wifiParam.wifiInfo[0].ssid.c_str(),
+                    this->_wifiParam.wifiInfo[0].pass.c_str());
+               delay(1000);
+               this->_setupAccessPoint();
+
+          }
+
           break;
      default:
           break;
@@ -379,7 +474,7 @@ void HaCWifiManager::_setupAccessPoint()
           DEBUG_CALLBACK_HAC("Failed to setup access point.");
           return;
      }
-
+     this->_apFlagStarted = true;
      DEBUG_CALLBACK_HAC("Access point successfully setup.");
 }
 
