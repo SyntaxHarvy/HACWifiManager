@@ -1,5 +1,5 @@
 # HACWifiManager
-Event driven wifimanage for esp8266 and esp32 arduino application.
+Event driven wifimanager for esp8266 and esp32 arduino application.
 
 ## Features
 1. Station Mode
