@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\..\\XTRCore\\XTRCorePIO"
+		},
+		{
+			"name": "HaCWifiManagerPIO",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
