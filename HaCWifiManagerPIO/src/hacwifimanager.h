@@ -1,3 +1,27 @@
+/**
+ *
+ * @file hacwifimanager.h
+ * @date 26.11.2021
+ * @author Harvy Aronales Costiniano
+ * 
+ * Copyright (c) 2021 Harvy Aronales Costiniano. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
 #ifndef __AMPWIFI_MANAGER_H_
 #define __AMPWIFI_MANAGER_H_
 
@@ -5,7 +29,8 @@
 
 /* #region Debug */
 #define HAC_DEBUG_PREFIX "[HACWIFIMANAGER]"
-
+#define WIFI_SCAN_TIMEOUT 1000   
+#define MAX_WIFI_SCAN_ATTEMPT 3
 #ifdef DEBUG_ESP_PORT
 
 #define DEBUG_HAC_WIFI Serial // Custom serial debug
@@ -41,6 +66,7 @@
 
 /* #region INTERNAL_DEPENDENCY */
 #include "hacwifimanagerparameters.h"
+#include "tick.h"
 /* #endregion */
 
 /* #region EXTERNAL_DEPENDENCY */
@@ -71,14 +97,22 @@ public:
     void setup(
         const char *defaultSSID,
         const char *defaultPass,
+        const char *hostName = "hacwfmhost",
         WifiMode mode = STA_ONLY,
-        bool enableMultiWifi = true,
-        bool enableDHCPNetwork = true,
-        const char *ip = "",
-        const char *gw = "",
-        const char *sn = "",
-        const char *pdns = "",
-        const char *sdns = "");
+        bool enableMultiWifi = false,
+        bool enableStaDHCPNetwork = true,
+        bool enableApDHCPNetwork = true,
+        const char *staIp = "10.0.1.100",
+        const char *staGw = "255.255.255.0",
+        const char *staSn = "0.0.0.0",
+        const char *staPdns = "0.0.0.0",
+        const char *staSdns = "0.0.0.0",
+        const char *apSsid = "mydefaultAP",
+        const char *apPass = "mydefaultAPPass",
+        const char *apIp = "192.168.4.1",
+        const char *apSn = "255.255.255.0",
+        const char *apGw = "0.0.0.0"        
+        );
     void setup(); // Function called on setting up the wifi manager Core
 
     void loop(); // Function called at the loop routine of the wifi
@@ -89,28 +123,38 @@ public:
     WifiMode getMode();
     void setEnableMultiWifi(bool enable = false);
     bool getEnableMultiWifi();
-    void setEnableDHCPNetwork(bool enable = false);
-    bool getEnableDHCPNetwork();
+    void setEnableDHCPNetwork(bool enableSta = false, bool enableAP = false);
+    bool getEnableDHCPNetwork(NetworkType netWorkType);
+    void setNetWorkInformation(const char *ip = "10.0.1.100",
+                    const char *sn = "255.255.255.0",
+                    const char *gw = "0.0.0.0",
+                    const char *pdns = "0.0.0.0",
+                    const char *sdns = "0.0.0.0",
+                    const char *apIp = "10.0.10.1",
+                    const char *apSn = "255.255.255.0",
+                    const char *apGw = "10.0.10.1"                           
+
+    );
+    void setAPInfo( const char *ssid = "mydefaultAP", 
+                    const char *pass = "mydefaultAPPass"
+                    );
+
+    void setHostName(const char *hostName);
+    String getHostName();
+    String getWifiConfigJson();
 
     void addWifiList(const char *ssid, const char *pass);
     bool editWifiList(const char *oldSsid, const char *oldPass,
                       const char *newSsid, const char *newPass);
     bool removeWifiList(const char *ssid);
 
-    void setNetworkIP(const char *ip);
-    String getNetworkIp();
-    void setNetworkSn(const char *sn);
-    String getNetworkSn();
-    void setNetworkGw(const char *gw);
-    String getNetworkGw();
-    void setNetworkPdns(const char *pdns);
-    String getNetworkPdns();
-    void setNetworkSdns(const char *sdns);
-    String getNetworkSdns();
-
+    
     void shutdownAP();
     void shutdownSTA();
     void shutdown();
+
+    String getStaIP();
+    String getAPIP();
 
     // Event Function Declaration
     void onDebug(tListGenCbFnHaC1StrParam fn);      // Debug related events
@@ -121,10 +165,8 @@ public:
     void onAPReady(tListGenCbFnHaC1StrParam fn);      // Event called when wifi successfully setup
     void onAPDisconnect(tListGenCbFnHaC1StrParam fn); // Event called when wifi loss connection for
     void onAPLoop(tListGenCbFnHaC1StrParam fn);    // either Access point or Station mode
-    void onReconnect(tListGenCbFnHaC fn);           // Event called when wifi establishing connection
-    void onStaMode(tListGenCbFnHaC fn);             // Event called when wifi established on station mode
-    void onAPMode(tListGenCbFnHaC fn);              // Event called when wifi established on Access
                                                     // point mode
+    void onAPNewConnection(tListGenCbFnHaC1StrParam fn);
 private:
     /**
             * Class which is the data holder of the HACWifiManager            
@@ -140,28 +182,37 @@ private:
     tListGenCbFnHaC1StrParam _onAPReadyFn;       // Function callback declaration for onready event
     tListGenCbFnHaC1StrParam _onAPDisconnectFn;  // Function callback declaration for onDisconnect event
     tListGenCbFnHaC1StrParam _onAPLoopFn; // Function callback declaration for onServiceLoop event
-    tListGenCbFnHaC _onReconnectFn;            // Function callback declaration for onReconnect event
-    tListGenCbFnHaC _onStaModeFn;              // Function callback declaration for onStaMode event
-    tListGenCbFnHaC _onAPModeFn;               // Function callback declaration for onAPMode event
+    tListGenCbFnHaC1StrParam _onAPNewConnectionFn; // Function callback declaration for onServiceLoop event
 
     bool _onReadyStateSTAFlagOnce = false;
     bool _onReadyStateAPFlagOnce = false;
     bool _apFlagStarted = false;
-    bool _manualNetworkSetupSuccess = false;
+    bool _manualStaNetworkSetupSuccess = false;
+    bool _manualApNetworkSetupSuccess = false;
+    bool _wifiScanFail = false;
     enum WifiMode _wifiMode; // Enum Wifi Mode
     char _defaultAccessPointID[132];
     char _defaultAccessPointPass[132];
     char _wifiMacAddress[128];
+    Tick _wifiScanTimer;
+    Tick _staStartupTimer;
+    Tick _staWatchdogTimer;
+    uint8_t _wifiScanCountAttempt = 0;
+    uint8_t _previousAPClientCount = 0;
 
     void _debug(const char *data); // Function prototype declaration for debug function
     void _printError(uint8_t errorCode);
-    void _setupMultiWifi();
-    void _setupSingleWifi(bool isStartUp = true);
-    bool _setupNetworkManually();
-    void _setupStation(const char *ssid, const char *pass);
-    void _setupAccessPoint();
+    void _initWifiManager();
+    void _initStation(bool isStartUp = true);
+    void _setupSTAMultiWifi(bool isStartUp = true);
+    bool _scanWifiListRssi(uint8_t totalAP);
+    void _sortWifiRssi();
+    void _setupSTASingleWifi(bool isStartUp = true);
+    bool _setupNetworkManually(NetworkType netWorkType);
+    void _startStation(const char *ssid, const char *pass);
+    void _startAccessPoint();
     void _generateAccessPointInformation();
-    int _setWifiMacAddress();
+    int _generateWifiMacStrLower();
 };
 /* #endregion */
 

@@ -1,3 +1,27 @@
+/**
+ *
+ * @file hacwifimanagerparameters.h
+ * @date 26.11.2021
+ * @author Harvy Aronales Costiniano
+ *
+ * Copyright (c) 2021 Harvy Aronales Costiniano. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
 #ifndef __AMPWIFI_MANAGER_PARAMETERS_H_
 #define __AMPWIFI_MANAGER_PARAMETERS_H_
 
@@ -33,7 +57,26 @@
 /* #region GLOBAL_DECLARATION */
 //typedef std::function<void()> tListGenCbFnHaCSub;                      // Standard void function with non-return value
 typedef std::function<void(const char *)> tListGenCbFnHaC1StrParamSub; // Standard void function with non-return value
+typedef std::function<void(uint8_t)> tListGenCbFnHaC1IntParamSub; // Standard void function with non-return value
+typedef struct WifiInfo {
+    String ssid;		
+    String pass;
+    int8_t rssi;
+} t_wifiInfo;
 
+typedef struct NetworkInfo {
+    String ip;		
+    String sn;
+    String gw;
+    String pdns;
+    String sdns;    
+} t_networkInfo;
+
+enum NetworkType
+{
+    NETWORK_STATION = 1, // Network for Station
+    NETWORK_AP  =2,     // Network for Access point
+};
 
 /* #endregion */
 
@@ -42,22 +85,10 @@ typedef std::function<void(const char *)> tListGenCbFnHaC1StrParamSub; // Standa
 class HACWifiManagerParameters{                                   
     public:
 
-        typedef struct WifiInfo {
-            String ssid;		
-            String pass;
-        } t_wifiInfo;
-
-        typedef struct NetworkInfo {
-            String ip;		
-            String sn;
-            String gw;
-            String pdns;
-            String sdns;
-        } t_networkInfo;
-
         std::vector<t_wifiInfo> wifiInfo;
         t_wifiInfo accessPointInfo;
-        t_networkInfo networkInfo;
+        t_networkInfo staNetworkInfo;
+        t_networkInfo apNetworkInfo;
 
         HACWifiManagerParameters();                         // Constructor
         ~HACWifiManagerParameters();                        // Desctructor
@@ -68,12 +99,16 @@ class HACWifiManagerParameters{
         uint8_t getMode();
         void setEnableMultiWifi(bool enable = false);
         bool getEnableMultiWifi();
-        void setEnableDHCPNetwork(bool enable = false);
-        bool getEnableDHCPNetwork();
+        void setEnableDHCPNetwork(bool enableSta = false, bool enableAp = false);
+        bool getEnableDHCPNetwork(NetworkType netWorkType);
+        void setHostName(const char *hostName);
+        String getHostName();
 
+
+        void clearWifiList();
         void addWifiList(const char *ssid, const char *pass);
-        bool editWifiList(const char * oldSsid, const char * oldPass, 
-                          const char * newSsid, const char * newPass);
+        bool editWifiList(const char *oldSsid, const char *oldPass, 
+                          const char *newSsid, const char *newPass);
         bool removeWifiList(const char *ssid);
         
         void setNetworkIP(const char *ip);
@@ -98,13 +133,15 @@ class HACWifiManagerParameters{
         */
         uint8_t _mode;
         bool _multiWifiEnable;
-        bool _dhcpNetworkEnable;
-        uint8_t _totalWifiList;
+        bool _dhcpStaNetworkEnable;
+        bool _dhcpApNetworkEnable;        
+        String _hostName;
         
         tListGenCbFnHaC1StrParamSub _onDebugFn;                        // Function callback declaration for debug event
         
         void _debug(const char *data);                              // Function prototype declaration for debug function
-
+        bool _wifiExists(t_wifiInfo w, tListGenCbFnHaC1IntParamSub fn);
+    
 };
 
 /* #endregion */
