@@ -385,6 +385,18 @@ void shutdownSTA();
 void shutdown();
 ```
 
+- **getStaIP**
+
+```cpp
+String getStaIP();
+```
+
+- **getAPIP**
+
+```cpp
+String getAPIP();
+```
+
 - **Events**
 
 ```cpp
