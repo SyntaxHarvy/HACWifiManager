@@ -125,6 +125,19 @@ void setup() {
   //onAPNewConnection Event
   gHaCWifiManager.onAPNewConnection(onAPNewConnectionCB);
 
+  //Setting wifi Options
+  //Default settings
+  //gHaCWifiManager.setWifiOptions();
+
+  //Custom settings
+  gHaCWifiManager.setWifiOptions(
+                        false,                    //Persistent
+                        WIFI_NONE_SLEEP,          //Sleep style
+                        16.5,                     //Output power  
+                        WIFI_PHY_MODE_11G         //Wifi Physical mode
+  );
+
+
  //Setup will start the wifimanager
  gHaCWifiManager.setup(String(wifidata).c_str());
 }

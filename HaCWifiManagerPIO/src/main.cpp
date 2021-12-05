@@ -5,6 +5,7 @@
  * @author Harvy Aronales Costiniano
  *
  * Basic setup of wifi manager without using Json parameter
+ * This example will explore other parameters define on the constructor
  * Setup function parameters define as below:
  *     void setup(
         const char *defaultSSID,              - Required
@@ -83,22 +84,71 @@ void setup() {
   //onAPNewConnection Event
   gHaCWifiManager.onAPNewConnection(onAPNewConnectionCB);
 
-  //Setting wifi Options
-  //Default settings
-  //gHaCWifiManager.setWifiOptions();
+ //Setup will start the wifimanager
+ //Visit : https://github.com/SyntaxHarvy/HACWifiManager.git
+ //For the detail of the setup parameters
+ //Note: First wifi ssid/pass is define on the setup function
+  
+ gHaCWifiManager.addWifiList("ssid2", "password2");
+ gHaCWifiManager.addWifiList("ssid3", "pass3");
+ gHaCWifiManager.addWifiList("ssid4", "pass4");
+ gHaCWifiManager.addWifiList("ssid5", "pass5");
 
-  //Custom settings
-  gHaCWifiManager.setWifiOptions(
+ //Note: First wifi ssid/pass is define on the setup function
+ //Option 1:
+ /*gHaCWifiManager.setup("ssid1",                   //default Station SSID
+                       "password1",            //default Station Password
+                       "myHostName",              //Device hostname
+                       BOTH_STA_AP,               //Wifi manager will act as both station & access point only 
+                       true,                      //Enable multi wifi  
+                       false,                     //Enable DCHP for Station
+                       false,                     //Enable DHCP for Access point
+                       "10.0.0.14",               //Station IP Address
+                       "255.255.255.0",           //Station subnet
+                       "10.0.0.1",                //Station gateway
+                       "0.0.0.0",                 //Station primary dns
+                       "0.0.0.0",                 //Station secondary dns
+                       "myapssid",                //AP ssid
+                       "myappassword",            //AP password
+                       "192.168.100.1",           //AP IP Address      
+                       "255.255.255.0",           //AP subnet         
+                       "192.168.100.1"            //AP gateway
+                       );
+                       */
+ //Option 2:
+ gHaCWifiManager.setEnableMultiWifi(true);        //Enable multiwifi
+ gHaCWifiManager.setMode(BOTH_STA_AP);            //Wifi manager will act as both station & access point only
+ gHaCWifiManager.setEnableDHCPNetwork(false, false);//First parameter is DHCP enable for station while 2nd parameter is the DHCP enable for Access point
+ gHaCWifiManager.setNetWorkInformation(
+                       "10.0.0.14",               //Station IP Address
+                       "255.255.255.0",           //Station subnet
+                       "10.0.0.1",                //Station gateway
+                       "0.0.0.0",                 //Station primary dns
+                       "0.0.0.0",                 //Station secondary dns
+                       "192.168.100.1",           //AP IP Address      
+                       "255.255.255.0",           //AP subnet         
+                       "192.168.100.1"            //AP gateway
+  );
+ gHaCWifiManager.setAPInfo("myapssid", "myappassword");
+ 
+ //Setting wifi Options
+ //Default settings
+ //gHaCWifiManager.setWifiOptions();
+
+ //Custom settings
+ gHaCWifiManager.setWifiOptions(
                         false,                    //Persistent
                         WIFI_NONE_SLEEP,          //Sleep style
                         16.5,                     //Output power  
                         WIFI_PHY_MODE_11G         //Wifi Physical mode
-  );
+ );
 
-  //Setup will start the wifimanager
-  gHaCWifiManager.setup("ssid1", "password1");
-  //Print the serial configuration in Json format
-  Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+
+ gHaCWifiManager.setup();
+ //Print the wifimanager configuration in Json format
+ Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+
+ 
 }
 
 void loop() {

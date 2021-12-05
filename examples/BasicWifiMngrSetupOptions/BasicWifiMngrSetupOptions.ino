@@ -84,14 +84,26 @@ void setup() {
   //onAPNewConnection Event
   gHaCWifiManager.onAPNewConnection(onAPNewConnectionCB);
 
- //Setup will start the wifimanager
- gHaCWifiManager.setup("ssid1",                   //default Station SSID
+  //Setting wifi Options
+  //Default settings
+  //gHaCWifiManager.setWifiOptions();
+
+  //Custom settings
+  gHaCWifiManager.setWifiOptions(
+                        false,                    //Persistent
+                        WIFI_NONE_SLEEP,          //Sleep style
+                        16.5,                     //Output power  
+                        WIFI_PHY_MODE_11G         //Wifi Physical mode
+  );
+
+  //Setup will start the wifimanager
+  gHaCWifiManager.setup("ssid1",                   //default Station SSID
                        "password1",               //default Station Password
                        "myHostName",              //Device hostname
                        BOTH_STA_AP                //Wifi manager will act both a station and access point                       
                        );
- //Print the serial configuration in Json format
- Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+  //Print the serial configuration in Json format
+  Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
 }
 
 void loop() {

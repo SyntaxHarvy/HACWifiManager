@@ -84,25 +84,37 @@ void setup() {
   //onAPNewConnection Event
   gHaCWifiManager.onAPNewConnection(onAPNewConnectionCB);
 
- //Setup will start the wifimanager
- //Visit : https://github.com/SyntaxHarvy/HACWifiManager.git
- //For the detail of the setup parameters
- //Note: First wifi ssid/pass is define on the setup function
+  //Setup will start the wifimanager
+  //Visit : https://github.com/SyntaxHarvy/HACWifiManager.git
+  //For the detail of the setup parameters
+  //Note: First wifi ssid/pass is define on the setup function
   
- gHaCWifiManager.addWifiList("ssid2", "pass2");
- gHaCWifiManager.addWifiList("ssid3", "pass3");
- gHaCWifiManager.addWifiList("ssid4", "pass4");
- gHaCWifiManager.addWifiList("ssid5", "pass5");
+  //Setting wifi Options
+  //Default settings
+  //gHaCWifiManager.setWifiOptions();
 
- //Note: First wifi ssid/pass is define on the setup function
- gHaCWifiManager.setup("ssid1",                   //default Station SSID
+  //Custom settings
+  gHaCWifiManager.setWifiOptions(
+                        false,                    //Persistent
+                        WIFI_NONE_SLEEP,          //Sleep style
+                        16.5,                     //Output power  
+                        WIFI_PHY_MODE_11G         //Wifi Physical mode
+  );
+ 
+  gHaCWifiManager.addWifiList("ssid2", "pass2");
+  gHaCWifiManager.addWifiList("ssid3", "pass3");
+  gHaCWifiManager.addWifiList("ssid4", "pass4");
+  gHaCWifiManager.addWifiList("ssid5", "pass5");
+
+  //Note: First wifi ssid/pass is define on the setup function
+  gHaCWifiManager.setup("ssid1",                   //default Station SSID
                        "password1",            //default Station Password
                        "myHostName",              //Device hostname
                        BOTH_STA_AP,               //Wifi manager will act as both station & access point only 
                        true                       //Enable multi wifi                 
                        );
- //Print the serial configuration in Json format
- Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+  //Print the serial configuration in Json format
+  Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
 }
 
 void loop() {

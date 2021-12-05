@@ -156,6 +156,14 @@ public:
     String getStaIP();
     String getAPIP();
 
+    /* Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7 */
+    void setWifiOptions(
+        bool persistent = false,
+        WiFiSleepType wifiSleepStyle = WIFI_NONE_SLEEP,
+        float outputPower = 16.5,
+        WiFiPhyMode wifiPhyMode = WIFI_PHY_MODE_11G
+    );
+
     // Event Function Declaration
     void onDebug(tListGenCbFnHaC1StrParam fn);      // Debug related events
     void onError(tListGenCbFnHaC1StrParam fn);      // Error related events
