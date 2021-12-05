@@ -400,6 +400,49 @@ void HaCWifiManager::shutdown()
 }
 
 /**
+     * Setting Wifi Options.
+     * Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7
+     * @param persistent Wifi Persistent
+     * @param wifiSleepStyle Wifi Sleep Style
+     * @param outputPower Wifi Output power  
+     * @param wifiPhyMode Wifi Physical Mode        
+     */
+void HaCWifiManager::setWifiOptions(bool persistent,
+                                    WiFiSleepType wifiSleepStyle,
+                                    float outputPower,
+                                    WiFiPhyMode wifiPhyMode
+)
+{
+     //Setting wifi sleep style
+     if(wifiSleepStyle < WIFI_NONE_SLEEP || wifiSleepStyle > WIFI_MODEM_SLEEP)
+     {
+          DEBUG_CALLBACK_HAC("Invalid wifi sleep style.");
+          this->_printError(21);
+          return;
+     }
+     WiFi.setSleepMode(wifiSleepStyle);
+     DEBUG_CALLBACK_HAC(String("Wifi sleep style =>" + String(wifiSleepStyle)).c_str());
+     //Setting wifi Physical Mode
+     if(wifiPhyMode < WIFI_PHY_MODE_11B || wifiPhyMode > WIFI_PHY_MODE_11N)
+     {
+          DEBUG_CALLBACK_HAC("Invalid wifi physical mode.");
+          this->_printError(21);
+          return;
+     }
+     WiFi.setPhyMode(wifiPhyMode);
+     DEBUG_CALLBACK_HAC(String("Wifi physical mode =>" + String(wifiPhyMode)).c_str());
+
+     //Setting wifi persistent enable
+     WiFi.persistent(persistent);
+     DEBUG_CALLBACK_HAC(String("Wifi persistent enable =>" + String(persistent)).c_str());
+
+     //Setting wifi power output
+     WiFi.setOutputPower(outputPower);
+     DEBUG_CALLBACK_HAC(String("Wifi output power =>" + String(outputPower)).c_str());
+
+}
+
+/**
      * Loop routine of the library.
      * Note: loop routine      
      * @param none
