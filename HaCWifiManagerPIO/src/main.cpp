@@ -89,7 +89,7 @@ void setup() {
  //For the detail of the setup parameters
  //Note: First wifi ssid/pass is define on the setup function
   
- gHaCWifiManager.addWifiList("ssid2", "password2");
+ gHaCWifiManager.addWifiList("ssid2", "");
  gHaCWifiManager.addWifiList("ssid3", "pass3");
  gHaCWifiManager.addWifiList("ssid4", "pass4");
  gHaCWifiManager.addWifiList("ssid5", "pass5");
