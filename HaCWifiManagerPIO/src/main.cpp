@@ -89,7 +89,7 @@ void setup() {
  //For the detail of the setup parameters
  //Note: First wifi ssid/pass is define on the setup function
   
- gHaCWifiManager.addWifiList("ssid2", "");
+ gHaCWifiManager.addWifiList("xtrpc", "xtrp@ssword1");
  gHaCWifiManager.addWifiList("ssid3", "pass3");
  gHaCWifiManager.addWifiList("ssid4", "pass4");
  gHaCWifiManager.addWifiList("ssid5", "pass5");
@@ -130,7 +130,7 @@ void setup() {
                        "192.168.100.1"            //AP gateway
   );
  gHaCWifiManager.setAPInfo("myapssid", "myappassword");
- 
+ gHaCWifiManager.setHostName("myDeviceHost");
  //Setting wifi Options
  //Default settings
  //gHaCWifiManager.setWifiOptions();
@@ -177,6 +177,7 @@ void onSTADisconnectCB(const char *msg){
 void onSTALoopCB(const char *msg){
   //TO DO: Add here all the services loop which are wifi dependent e.g mqtt.loop etc..
   //Serial.println("Station loop =>" + String(msg));
+  Serial.println(ESP.getFreeHeap());
 }
 void onAPReadyCB(const char *msg){
   //TO DO: Add here all AP ready handle
@@ -189,7 +190,7 @@ void onAPDisconnectCB(const char *msg){
 }
 void onAPLoopCB(const char *msg){
   //TO DO: Add here all the services loop which are wifi dependent e.g webserver.handle etc..
-  //Serial.println("Access point loop =>" + String(msg));
+  //println("Access point loop =>" + String(msg));
 }
 void onAPNewConnectionCB(const char *msg){
   //TO DO: Add here all the services loop which are wifi dependent e.g webserver.handle etc..

@@ -176,10 +176,6 @@ public:
                                                     // point mode
     void onAPNewConnection(tListGenCbFnHaC1StrParam fn);
 private:
-    /**
-            * Class which is the data holder of the HACWifiManager            
-            * @param 
-        */
 
     HACWifiManagerParameters _wifiParam;       // Private declaration of AMPWifiManagerData
     tListGenCbFnHaC1StrParam _onDebugFn;       // Function callback declaration for onDebug event
