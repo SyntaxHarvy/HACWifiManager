@@ -281,7 +281,9 @@ void HACWifiManagerParameters::clearWifiList()
      */
 void HACWifiManagerParameters::addWifiList(const char *ssid, const char *pass)
 {
-     if (String(ssid) == "" || String(pass) == "")
+     //Remove the checking for empty password to allow a connection to non secure wifi AP
+     //Note: Refer, https://github.com/SyntaxHarvy/HACWifiManager/issues/10
+     if (String(ssid) == "")
           return;
 
      WifiInfo w;
@@ -311,10 +313,11 @@ void HACWifiManagerParameters::addWifiList(const char *ssid, const char *pass)
 bool HACWifiManagerParameters::editWifiList(const char *oldSsid, const char *oldPass,
                                             const char *newSsid, const char *newPass)
 {
-     if (String(oldSsid) == "" || 
-         String(oldPass) == "" || 
-         String(newSsid) == "" || 
-         String(newPass) == "" 
+     //Remove the checking for empty password to allow a connection to non secure wifi AP
+     //Note: Refer, https://github.com/SyntaxHarvy/HACWifiManager/issues/10
+
+     if (String(oldSsid) == "" ||          
+         String(newSsid) == ""         
          )
           return false;
      
