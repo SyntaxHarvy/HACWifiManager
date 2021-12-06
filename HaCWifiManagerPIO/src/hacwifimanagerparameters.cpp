@@ -32,12 +32,12 @@
 
 /* #region CLASS_DEFINITION */
 /**
-     * HACWifiManagerParameters Desstructor     *
+     * HACWifiManagerParameters Constructor
      */
 HACWifiManagerParameters::HACWifiManagerParameters() {}
 
 /**
-     * HACWifiManagerParameters Constructor     *
+     * HACWifiManagerParameters Destructor
      */
 HACWifiManagerParameters::~HACWifiManagerParameters()
 {
@@ -136,6 +136,7 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
 /**
      * Convert HACWifiManagerParameters class into Json *
      * @param jsonStr Wifi parameters in json format as const char *.
+     * @return String Json parameter
      */
 String HACWifiManagerParameters::toJson()
 {
@@ -183,7 +184,8 @@ void HACWifiManagerParameters::setMode(uint8_t mode)
 }
 
 /**
-     * Getting wifi mode.          
+     * Getting wifi mode.    
+     * @return Wifimode      
      */
 uint8_t HACWifiManagerParameters::getMode()
 {
@@ -207,7 +209,8 @@ void HACWifiManagerParameters::setEnableMultiWifi(bool enable)
 }
 
 /**
-     * Getting multiwifi enable mode.          
+     * Getting multiwifi enable mode. 
+     * @return Enable Multiwifi flag        
      */
 bool HACWifiManagerParameters::getEnableMultiWifi()
 {
@@ -258,7 +261,7 @@ void HACWifiManagerParameters::setHostName(const char *hostName)
 }
 /**
      * Setting DHCP enable mode.     
-     * @return Device Network Host Name    
+     * @return String Device Network Host Name    
      */
 String HACWifiManagerParameters::getHostName()
 {
@@ -340,7 +343,8 @@ bool HACWifiManagerParameters::editWifiList(const char *oldSsid, const char *old
 
 /**
      * Removing wifi info from wifi list info
-     * @param ssid Wifi SSID        
+     * @param ssid Wifi SSID   
+     * @return True if removing wifi from the list is successful otherwise false.     
      */
 bool HACWifiManagerParameters::removeWifiList(const char *ssid)
 {

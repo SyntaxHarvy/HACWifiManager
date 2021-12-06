@@ -54,9 +54,6 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
      if (!error)
      {
           DEBUG_CALLBACK_HAC("Data is a valid json.");
-          //Initialize _wifiParam debug callback function
-          this->_wifiParam.onDebug([&](const char *msg)
-                                   { DEBUG_CALLBACK_HAC(msg); });
           //Set wifiParam hostname
           this->_generateWifiMacStrLower();
           this->_wifiParam.setHostName(String("hacwfm" + String(this->_wifiMacAddress) ).c_str());
@@ -426,7 +423,7 @@ void HaCWifiManager::setWifiOptions(bool persistent,
      if(wifiPhyMode < WIFI_PHY_MODE_11B || wifiPhyMode > WIFI_PHY_MODE_11N)
      {
           DEBUG_CALLBACK_HAC("Invalid wifi physical mode.");
-          this->_printError(21);
+          this->_printError(22);
           return;
      }
      WiFi.setPhyMode(wifiPhyMode);
@@ -476,30 +473,27 @@ void HaCWifiManager::loop()
      {
           //TO DO: Pass json data for the status of the STA
           if (this->_onSTALoopFn)
-               this->_onSTALoopFn("Wifi loop");
+               this->_onSTALoopFn("");
      }
      //Access point onReady event
      if (this->_apFlagStarted && !this->_onReadyStateAPFlagOnce)
      {
-          this->_onReadyStateAPFlagOnce = true;
-          //TO DO: Pass json data for the status of the STA
+          this->_onReadyStateAPFlagOnce = true;          
           if (this->_onAPReadyFn)
-               this->_onAPReadyFn("Wifi loop");
+               this->_onAPReadyFn(WiFi.softAPSSID().c_str());
      }
      //Access point onDisconnect event
      if (!this->_apFlagStarted && this->_onReadyStateAPFlagOnce)
      {
-          this->_onReadyStateAPFlagOnce = false;
-          //TO DO: Pass json data for the status of the STA
+          this->_onReadyStateAPFlagOnce = false;          
           if (this->_onAPDisconnectFn)
-               this->_onAPDisconnectFn("Wifi loop");
+               this->_onAPDisconnectFn(WiFi.softAPSSID().c_str());
      }
      //Access point onAPLoop event
      if (this->_onReadyStateAPFlagOnce)
-     {
-          //TO DO: Pass json data for the status of the STA
+     {          
           if (this->_onAPLoopFn)
-               this->_onAPLoopFn("Wifi loop");
+               this->_onAPLoopFn("");
      }
      //Access point new client connection event
      if(WiFi.softAPgetStationNum() != this->_previousAPClientCount)
@@ -507,7 +501,7 @@ void HaCWifiManager::loop()
           this->_previousAPClientCount = WiFi.softAPgetStationNum();
           //TO DO: Pass json data for the status of the STA
           if (this->_onAPNewConnectionFn)
-               this->_onAPNewConnectionFn("New Connection");
+               this->_onAPNewConnectionFn(String("{\"no_client\": " + String(WiFi.softAPgetStationNum()) + "}").c_str());
 
      }
      //All timers
@@ -996,6 +990,7 @@ void HaCWifiManager::_generateAccessPointInformation()
 }
 /**
      * Function that will convert mac address into lower case format
+     * @return int value not equal to 0 when generation is successful
      */
 
 int HaCWifiManager::_generateWifiMacStrLower()
