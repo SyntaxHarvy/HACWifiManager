@@ -177,7 +177,7 @@ void onSTADisconnectCB(const char *msg){
 void onSTALoopCB(const char *msg){
   //TO DO: Add here all the services loop which are wifi dependent e.g mqtt.loop etc..
   //Serial.println("Station loop =>" + String(msg));
-  Serial.println(ESP.getFreeHeap());
+  //Serial.println(ESP.getFreeHeap());
 }
 void onAPReadyCB(const char *msg){
   //TO DO: Add here all AP ready handle
