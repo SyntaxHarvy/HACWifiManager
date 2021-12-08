@@ -452,6 +452,27 @@ void HaCWifiManager::loop()
           if (this->_onSTAReadyFn)
                this->_onSTAReadyFn(WiFi.SSID().c_str());
           this->_onReadyStateSTAFlagOnce = true;
+
+          //Initialize MDNS once
+          if(!this->_initMdnsFlagOnce)
+          {
+               String hostName = this->getHostName();
+               //If host name is empty then set the default hostname
+               if(hostName == "") hostName = String(DEFAULT_HOST_NAME);
+
+               if(MDNS.begin(hostName))
+               {
+                    DEBUG_CALLBACK_HAC("MDNS Started.");
+                    this->_initMdnsFlagOnce = true;
+               }
+               else
+               {
+                    DEBUG_CALLBACK_HAC("MDNS failed to start.");
+                    this->_printError(23);
+               }
+               
+          }
+
      }
      //Wifi station onDisconnect event
      if (WiFi.status() != WL_CONNECTED && this->_onReadyStateSTAFlagOnce)
@@ -474,6 +495,9 @@ void HaCWifiManager::loop()
           //TO DO: Pass json data for the status of the STA
           if (this->_onSTALoopFn)
                this->_onSTALoopFn("");
+          
+          //If MDNS initialized, then start MDNS loop
+          if(this->_initMdnsFlagOnce) MDNS.update();  
      }
      //Access point onReady event
      if (this->_apFlagStarted && !this->_onReadyStateAPFlagOnce)
