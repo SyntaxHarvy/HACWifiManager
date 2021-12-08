@@ -29,6 +29,7 @@
 
 /* #region Debug */
 #define HAC_DEBUG_PREFIX "[HACWIFIMANAGER]"
+#define DEFAULT_HOST_NAME "HACWIFIMNGRHOST"
 #define WIFI_SCAN_TIMEOUT 1000   
 #define MAX_WIFI_SCAN_ATTEMPT 3
 #ifdef DEBUG_ESP_PORT
@@ -71,7 +72,17 @@
 
 /* #region EXTERNAL_DEPENDENCY */
 #include <Arduino.h>
+
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
+#endif
+
+#if defined(ESP32)
+#include <WiFi.h>
+#include <ESPmDNS.h>
+#endif
+
 #include <ArduinoJson.h>
 /* #endregion */
 
@@ -194,6 +205,7 @@ private:
     bool _manualStaNetworkSetupSuccess = false;
     bool _manualApNetworkSetupSuccess = false;
     bool _wifiScanFail = false;
+    bool _initMdnsFlagOnce = false;
     enum WifiMode _wifiMode; // Enum Wifi Mode
     char _defaultAccessPointID[132];
     char _defaultAccessPointPass[132];
