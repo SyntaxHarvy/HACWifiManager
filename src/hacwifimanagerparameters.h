@@ -93,7 +93,7 @@ class HACWifiManagerParameters{
         HACWifiManagerParameters();                         // Constructor
         ~HACWifiManagerParameters();                        // Desctructor
         void fromJson(const char *jsonStr);                 // Accept json string and convert it to HACWifiManagerParameters class
-        String toJson();                                    // Convert HACWifiManagerParameters class into Json
+        void toJson(String *jsonConfig);                                    // Convert HACWifiManagerParameters class into Json
 
         void setMode(uint8_t mode);
         uint8_t getMode();

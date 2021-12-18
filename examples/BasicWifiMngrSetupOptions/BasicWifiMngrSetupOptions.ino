@@ -103,7 +103,10 @@ void setup() {
                        BOTH_STA_AP                //Wifi manager will act both a station and access point                       
                        );
   //Print the serial configuration in Json format
-  Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+  String jsonConfig;
+  gHaCWifiManager.getWifiConfigJson(&jsonConfig);
+  Serial.printf("Wifi Manager Configuration : %s \n", jsonConfig.c_str());
+
 }
 
 void loop() {

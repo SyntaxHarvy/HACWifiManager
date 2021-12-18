@@ -60,11 +60,6 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
           //Json data is a valid json format hence it will be safe to be process by the wifi parameter class
           this->_wifiParam.fromJson(wifiJsonStr);
 
-          /* #region Debug */
-          //Read back the value from the wifiParam as json string
-          DEBUG_CALLBACK_HAC(String("Reading back json value from wifiParam class =>" + String(this->_wifiParam.toJson())).c_str());
-          /* #endregion */
-
           //Setting up wifi Core
           this->setup();
      }
@@ -147,11 +142,6 @@ void HaCWifiManager::setup(
 
      //Setup wifimanager
      this->setup();
-
-     /* #region Debug */
-     DEBUG_CALLBACK_HAC("Parameters in Json");
-     DEBUG_CALLBACK_HAC(this->_wifiParam.toJson().c_str());
-     /* #endregion */
 
 }
 
@@ -330,11 +320,10 @@ String HaCWifiManager::getHostName()
 
 /**
      * Getting the wifimanager configuration in Json string
-     * @return Wifi manager configuration in Json string
      */
-String HaCWifiManager::getWifiConfigJson()
+void HaCWifiManager::getWifiConfigJson(String *jsonConfig)
 {
-     return this->_wifiParam.toJson();
+     this->_wifiParam.toJson(jsonConfig);
 }
 
 /**
@@ -488,6 +477,8 @@ void HaCWifiManager::loop()
           //if multiwifi is enabled then reinitialized the wifi multimode setup
           if (this->_wifiParam.getEnableMultiWifi())
                this->_setupSTAMultiWifi();
+
+          
      }
      //Wifi onSTATLoop event
      if (this->_onReadyStateSTAFlagOnce)
