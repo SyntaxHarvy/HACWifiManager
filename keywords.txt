@@ -1,0 +1,51 @@
+#######################################
+# Syntax Coloring Map For HACWifiManager
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+HACWifiManager	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setup 	KEYWORD2
+loop 	KEYWORD2
+setMode 	KEYWORD2
+getMode 	KEYWORD2
+setEnableMultiWifi 	KEYWORD2
+getEnableMultiWifi 	KEYWORD2
+setEnableDHCPNetwork 	KEYWORD2
+getEnableDHCPNetwork 	KEYWORD2
+setNetWorkInformation 	KEYWORD2
+setAPInfo 	KEYWORD2
+setHostName 	KEYWORD2
+getHostName 	KEYWORD2
+getWifiConfigJson 	KEYWORD2
+addWifiList 	KEYWORD2
+editWifiList 	KEYWORD2
+removeWifiList 	KEYWORD2
+shutdownAP 	KEYWORD2
+shutdownSTA 	KEYWORD2
+shutdown 	KEYWORD2
+getStaIP 	KEYWORD2
+getAPIP 	KEYWORD2
+setWifiOptions 	KEYWORD2
+onError 	KEYWORD2
+onSTAReady 	KEYWORD2
+onSTADisconnect 	KEYWORD2
+onSTALoop 	KEYWORD2
+onAPReady 	KEYWORD2
+onAPDisconnect 	KEYWORD2
+onAPLoop 	KEYWORD2
+onAPNewConnection 	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+STA_ONLY	LITERAL1
+AP_ONLY	LITERAL1
+BOTH_STA_AP	LITERAL1

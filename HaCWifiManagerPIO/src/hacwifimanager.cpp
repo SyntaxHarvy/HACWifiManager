@@ -488,6 +488,8 @@ void HaCWifiManager::loop()
           //if multiwifi is enabled then reinitialized the wifi multimode setup
           if (this->_wifiParam.getEnableMultiWifi())
                this->_setupSTAMultiWifi();
+
+          
      }
      //Wifi onSTATLoop event
      if (this->_onReadyStateSTAFlagOnce)
