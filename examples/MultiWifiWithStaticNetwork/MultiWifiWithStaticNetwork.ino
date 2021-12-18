@@ -142,12 +142,13 @@ void setup() {
                        "255.255.255.0",           //AP subnet         
                        "192.168.100.1"            //AP gateway
   );
- gHaCWifiManager.setAPInfo("myapssid", "myappassword");
- gHaCWifiManager.setup();
- //Print the wifimanager configuration in Json format
- Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+  gHaCWifiManager.setAPInfo("myapssid", "myappassword");
+  gHaCWifiManager.setup();
+  //Print the wifimanager configuration in Json format
+   String jsonConfig;
+  gHaCWifiManager.getWifiConfigJson(&jsonConfig);
+  Serial.printf("Wifi Manager Configuration : %s \n", jsonConfig.c_str());
 
- 
 }
 
 void loop() {

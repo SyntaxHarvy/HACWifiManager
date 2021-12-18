@@ -152,7 +152,7 @@ public:
 
     void setHostName(const char *hostName);
     String getHostName();
-    String getWifiConfigJson();
+    void getWifiConfigJson(String *jsonConfig);
 
     void addWifiList(const char *ssid, const char *pass);
     bool editWifiList(const char *oldSsid, const char *oldPass,

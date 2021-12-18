@@ -98,7 +98,11 @@ void setup() {
   //Setup will start the wifimanager
   gHaCWifiManager.setup("ssid1", "password1");
   //Print the serial configuration in Json format
-  Serial.printf("Wifi Manager Configuration : %s \n", gHaCWifiManager.getWifiConfigJson().c_str());
+  //Print the wifimanager configuration in Json format
+  String jsonConfig;
+  gHaCWifiManager.getWifiConfigJson(&jsonConfig);
+  Serial.printf("Wifi Manager Configuration : %s \n", jsonConfig.c_str());
+
 }
 
 void loop() {

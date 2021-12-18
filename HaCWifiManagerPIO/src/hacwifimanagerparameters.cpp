@@ -136,12 +136,10 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
 /**
      * Convert HACWifiManagerParameters class into Json *
      * @param jsonStr Wifi parameters in json format as const char *.
-     * @return String Json parameter
      */
-String HACWifiManagerParameters::toJson()
+void HACWifiManagerParameters::toJson(String *jsonConfig)
 {
 
-     String tmp = "";
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
      doc["mode"] = this->_mode;
      doc["enable_multi_wifi"] = this->_multiWifiEnable;
@@ -169,9 +167,8 @@ String HACWifiManagerParameters::toJson()
      }
 
      doc.shrinkToFit();
-     serializeJson(doc, tmp);
+     serializeJson(doc, (*jsonConfig));
 
-     return tmp;
 }
 
 /**
