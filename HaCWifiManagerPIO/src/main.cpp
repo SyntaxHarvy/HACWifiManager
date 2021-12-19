@@ -43,7 +43,7 @@
  * https://github.com/SyntaxHarvy/HACWifiManager.git
  */
 
-#include <hacwifimanager.h>
+#include <HACWifiManager.h>
 
 //Instantiate wifimanager
 HaCWifiManager gHaCWifiManager;
