@@ -1,5 +1,5 @@
 {
-  "name": "hacwifimanager",
+  "name": "HACWifiManager",
   "keywords": "wifimanager, esp8266",
   "description": "An event driven wifimanager library with Json input",
   "repository":
