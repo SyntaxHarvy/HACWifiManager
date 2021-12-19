@@ -124,7 +124,9 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
                this->wifiInfo.push_back(w);
 
                /* #region Debug */
+               #ifdef DEBUG_ESP_PORT
                uint8_t index = this->wifiInfo.size() - 1;
+               #endif
                DEBUG_CALLBACK_HAC_PARAM(String("Wifi Index = " + String(index)).c_str());
                DEBUG_CALLBACK_HAC_PARAM(String("ssid = " + this->wifiInfo[index].ssid).c_str());
                DEBUG_CALLBACK_HAC_PARAM(String("password = " + this->wifiInfo[index].pass).c_str());
