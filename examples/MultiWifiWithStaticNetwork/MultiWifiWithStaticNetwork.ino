@@ -40,10 +40,10 @@
     NETWORK_AP  = 2,     // Network for Access point
   }
  * This example code is in the public domain.
- * https://github.com/SyntaxHarvy/HACWifiManager.git
+ * https://github.com/SyntaxHarvy/HACWifiManager
  */
 
-#include <hacwifimanager.h>
+#include <HACWifiManager.h>
 
 //Instantiate wifimanager
 HaCWifiManager gHaCWifiManager;
