@@ -1,5 +1,5 @@
 {
-  "name": "hacwifimanager",
+  "name": "HACWifiManager",
   "keywords": "wifimanager, esp8266",
   "description": "An event driven wifimanager library with Json input",
   "repository":
@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/SyntaxHarvy/HACWifiManager.git"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "frameworks": "arduino",
   "platforms": "*"
 }
