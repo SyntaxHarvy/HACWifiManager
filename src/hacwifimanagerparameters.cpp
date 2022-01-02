@@ -50,7 +50,7 @@ HACWifiManagerParameters::~HACWifiManagerParameters()
      */
 void HACWifiManagerParameters::fromJson(const char *jsonStr)
 {
-     DEBUG_CALLBACK_HAC_PARAM("Decoding json data.");
+     DEBUG_CALLBACK_HAC_PARAM(F("Decoding json data."));
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 8192);
      DeserializationError error = deserializeJson(doc, jsonStr);
      doc.shrinkToFit();
@@ -59,16 +59,16 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
           this->_mode = doc["mode"].as<uint8_t>();
           this->_multiWifiEnable = doc["enable_multi_wifi"].as<bool>();
           this->_dhcpStaNetworkEnable = doc["enable_dhcp_network_sta"].as<bool>();
-          this->_dhcpStaNetworkEnable = doc["enable_dhcp_network_ap"].as<bool>();
+          this->_dhcpApNetworkEnable = doc["enable_dhcp_network_ap"].as<bool>();
 
-          if(doc["host_name"].as<String>() != "null") 
+          if(doc["host_name"].as<String>() != HAC_WFM_STRING_NULL) 
                this->_hostName = doc["host_name"].as<String>();
-          /* #region Debug */
-          DEBUG_CALLBACK_HAC_PARAM(String("Hostname = " + this->_hostName).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("Mode = " + String(this->_mode)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("Enable Multi Wifi = " + String(this->_multiWifiEnable)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("Enable DHCP Station = " + String(this->_dhcpStaNetworkEnable)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("Enable DHCP Access Point = " + String(this->_dhcpApNetworkEnable)).c_str());
+          /* #region Debug */   
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG1, this->_hostName.c_str());       
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG2, this->_mode);
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG3, this->_multiWifiEnable);
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG4, this->_dhcpStaNetworkEnable);
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG5, this->_dhcpApNetworkEnable);
           /* #endregion */
 
           this->staNetworkInfo.ip = doc["sta_network"]["ip"].as<String>();
@@ -88,18 +88,19 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
 
 
           /* #region Debug */
-          DEBUG_CALLBACK_HAC_PARAM(String("AP SSID = " + String(this->accessPointInfo.ssid)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("AP PASS = " + String(this->accessPointInfo.pass)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM("Network setup for Station");
-          DEBUG_CALLBACK_HAC_PARAM(String("IP = " + String(this->staNetworkInfo.ip)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("SN = " + String(this->staNetworkInfo.sn)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("GW = " + String(this->staNetworkInfo.gw)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("PDNS = " + String(this->staNetworkInfo.pdns)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("SDNS = " + String(this->staNetworkInfo.sdns)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM("Network setup for AP");
-          DEBUG_CALLBACK_HAC_PARAM(String("IP = " + String(this->apNetworkInfo.ip)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("SN = " + String(this->apNetworkInfo.sn)).c_str());
-          DEBUG_CALLBACK_HAC_PARAM(String("GW = " + String(this->apNetworkInfo.gw)).c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG6, this->accessPointInfo.ssid.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG7, this->accessPointInfo.pass.c_str());
+          DEBUG_CALLBACK_HAC_PARAM(F("Network setup for Station"));
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG8, this->staNetworkInfo.ip.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG9, this->staNetworkInfo.sn.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG10, this->staNetworkInfo.gw.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG11, this->staNetworkInfo.pdns.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG12, this->staNetworkInfo.sdns.c_str());
+          DEBUG_CALLBACK_HAC_PARAM(F("Network setup for AP"));
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG8, this->apNetworkInfo.ip.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG9, this->apNetworkInfo.sn.c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG10, this->apNetworkInfo.gw.c_str());
+          
           /* #endregion */
 
           JsonObject wifiList = doc["wifilist"].as<JsonObject>();
@@ -127,9 +128,9 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
                #ifdef DEBUG_ESP_PORT
                uint8_t index = this->wifiInfo.size() - 1;
                #endif
-               DEBUG_CALLBACK_HAC_PARAM(String("Wifi Index = " + String(index)).c_str());
-               DEBUG_CALLBACK_HAC_PARAM(String("ssid = " + this->wifiInfo[index].ssid).c_str());
-               DEBUG_CALLBACK_HAC_PARAM(String("password = " + this->wifiInfo[index].pass).c_str());
+               DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG13, index);
+               DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG14, this->wifiInfo[index].ssid.c_str());
+               DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG15, this->wifiInfo[index].pass.c_str());
                /* #endregion */
           }
      }
@@ -298,11 +299,11 @@ void HACWifiManagerParameters::addWifiList(const char *ssid, const char *pass)
           this->wifiInfo[index].pass = w.pass;
      }))
      {
-          DEBUG_CALLBACK_HAC_PARAM("Wifi just added already exist.");
+          DEBUG_CALLBACK_HAC_PARAM(F("Wifi just added already exist."));
           return;
      } 
 
-     DEBUG_CALLBACK_HAC_PARAM(String("Total wifi =>" + String(this->wifiInfo.size())).c_str());
+     DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG16, this->wifiInfo.size());
      this->wifiInfo.push_back(w);
 }
 
@@ -379,9 +380,22 @@ void HACWifiManagerParameters::onDebug(tListGenCbFnHaC1StrParamSub fn)
 }
 
 /**
+ * Debug function.
+ * @param data Debug message .
+ */
+void HACWifiManagerParameters::_debug(const __FlashStringHelper* data)
+{
+    char buffer[128];
+    memset(buffer, '\0', sizeof(buffer));
+    strcpy_P(buffer, (const char*) data);
+    if (this->_onDebugFn)
+        this->_onDebugFn(buffer);
+}
+
+/**
      * Debug function.     
      * Note, this is the debug of HACWifiManagerParameters which is a private class of HaCWifiManager
-     * @param data const char *.
+     * @param data Debug message.
      */
 void HACWifiManagerParameters::_debug(const char *data)
 {
@@ -399,7 +413,7 @@ bool HACWifiManagerParameters::_wifiExists(t_wifiInfo w, tListGenCbFnHaC1IntPara
      uint8_t i = 0;
      for (auto entry : this->wifiInfo)
      {
-          DEBUG_CALLBACK_HAC_PARAM(String("New ssid = " + w.ssid + " Comparing to =" +  entry.ssid).c_str());
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG17, w.ssid.c_str(), entry.ssid.c_str());
           if (entry.ssid == w.ssid)
           {
                //If it exist raised the function callback to initiate the action remotely

@@ -46,17 +46,17 @@ HaCWifiManager::HaCWifiManager() {
 void HaCWifiManager::setup(const char *wifiJsonStr)
 {
      //Setup the wifi parameters from Json format string
-     DEBUG_CALLBACK_HAC("Setting up wifi parameters from json data.");
+     DEBUG_CALLBACK_HAC(F("Setting up wifi parameters from json data."));
      //Process the json data
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 8192);
      DeserializationError error = deserializeJson(doc, wifiJsonStr);
      doc.shrinkToFit();
      if (!error)
      {
-          DEBUG_CALLBACK_HAC("Data is a valid json.");
+          DEBUG_CALLBACK_HAC(F("Data is a valid json."));
           //Set wifiParam hostname
           this->_generateWifiMacStrLower();
-          this->_wifiParam.setHostName(String("hacwfm" + String(this->_wifiMacAddress) ).c_str());
+          this->_wifiParam.setHostName(String(String(DEFAULT_HOST_NAME) + String(this->_wifiMacAddress)).c_str());
           //Json data is a valid json format hence it will be safe to be process by the wifi parameter class
           this->_wifiParam.fromJson(wifiJsonStr);
 
@@ -65,7 +65,7 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
      }
      else
      {
-          DEBUG_CALLBACK_HAC("Failed to resolve wifi parameters, due to invalid json format!");
+          DEBUG_CALLBACK_HAC(F("Failed to resolve wifi parameters, due to invalid json format!"));
      }
 }
 
@@ -114,7 +114,7 @@ void HaCWifiManager::setup(
      if(String(hostName) == "")
      {
           this->_generateWifiMacStrLower();
-          this->setHostName(String("hacwfm" + String(this->_wifiMacAddress) ).c_str());
+          this->setHostName(String(String(DEFAULT_HOST_NAME) + String(this->_wifiMacAddress) ).c_str());
      }
      else
           this->setHostName(hostName);
@@ -155,14 +155,14 @@ void HaCWifiManager::setup()
      if (this->_wifiParam.getMode() < STA_ONLY || this->_wifiParam.getMode() > BOTH_STA_AP)
      {
           this->_printError(1);
-          DEBUG_CALLBACK_HAC("Invalid wifi mode!");
+          DEBUG_CALLBACK_HAC(F("Invalid wifi mode!"));
           return;
      }
      //Check and ssid or password pair
      if (this->_wifiParam.getWifiListCount() == 0)
      {
           this->_printError(2);
-          DEBUG_CALLBACK_HAC("There is no ssid configured!");
+          DEBUG_CALLBACK_HAC(F("There is no ssid configured!"));
           return;
      }
 
@@ -172,7 +172,7 @@ void HaCWifiManager::setup()
      this->_wifiScanTimer = Tick((unsigned long)WIFI_SCAN_TIMEOUT);
 
      //Wifi is ready for start up
-     DEBUG_CALLBACK_HAC("Initializing  manager..");
+     DEBUG_CALLBACK_HAC(F("Initializing  manager.."));
      this->_initWifiManager();
 }
 
@@ -402,29 +402,29 @@ void HaCWifiManager::setWifiOptions(bool persistent,
      //Setting wifi sleep style
      if(wifiSleepStyle < WIFI_NONE_SLEEP || wifiSleepStyle > WIFI_MODEM_SLEEP)
      {
-          DEBUG_CALLBACK_HAC("Invalid wifi sleep style.");
+          DEBUG_CALLBACK_HAC(F("Invalid wifi sleep style."));
           this->_printError(21);
           return;
      }
-     WiFi.setSleepMode(wifiSleepStyle);
-     DEBUG_CALLBACK_HAC(String("Wifi sleep style =>" + String(wifiSleepStyle)).c_str());
+     WiFi.setSleepMode(wifiSleepStyle);     
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG100, wifiSleepStyle);
      //Setting wifi Physical Mode
      if(wifiPhyMode < WIFI_PHY_MODE_11B || wifiPhyMode > WIFI_PHY_MODE_11N)
      {
-          DEBUG_CALLBACK_HAC("Invalid wifi physical mode.");
+          DEBUG_CALLBACK_HAC(F("Invalid wifi physical mode."));
           this->_printError(22);
           return;
      }
      WiFi.setPhyMode(wifiPhyMode);
-     DEBUG_CALLBACK_HAC(String("Wifi physical mode =>" + String(wifiPhyMode)).c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG101, wifiPhyMode);
 
      //Setting wifi persistent enable
      WiFi.persistent(persistent);
-     DEBUG_CALLBACK_HAC(String("Wifi persistent enable =>" + String(persistent)).c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG102, persistent);
 
      //Setting wifi power output
      WiFi.setOutputPower(outputPower);
-     DEBUG_CALLBACK_HAC(String("Wifi output power =>" + String(outputPower)).c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG103, outputPower);
 
 }
 
@@ -451,12 +451,12 @@ void HaCWifiManager::loop()
 
                if(MDNS.begin(hostName))
                {
-                    DEBUG_CALLBACK_HAC("MDNS Started.");
+                    DEBUG_CALLBACK_HAC(F("MDNS Started."));
                     this->_initMdnsFlagOnce = true;
                }
                else
                {
-                    DEBUG_CALLBACK_HAC("MDNS failed to start.");
+                    DEBUG_CALLBACK_HAC(F("MDNS failed to start."));
                     this->_printError(23);
                }
                
@@ -615,6 +615,18 @@ void HaCWifiManager::onAPNewConnection(tListGenCbFnHaC1StrParamSub fn)
      this->_onAPNewConnectionFn = fn;
 }
 
+/**
+ * Debug function.
+ * @param data Debug message .
+ */
+void HaCWifiManager::_debug(const __FlashStringHelper* data)
+{
+    char buffer[128];
+    memset(buffer, '\0', sizeof(buffer));
+    strcpy_P(buffer, (const char*) data);
+    if (this->_onDebugFn)
+        this->_onDebugFn(String(String(HAC_DEBUG_PREFIX) + " " + String(buffer)).c_str());
+}
 
 /**
      * Debug function.     
@@ -673,7 +685,7 @@ void HaCWifiManager::_initWifiManager()
      */
 void HaCWifiManager::_initStation(bool isStartUp)
 {
-     DEBUG_CALLBACK_HAC("Initializing station..");
+     DEBUG_CALLBACK_HAC(F("Initializing station.."));
      //Check if it is multi or single wifi
      if (this->_wifiParam.getEnableMultiWifi())
           this->_setupSTAMultiWifi(isStartUp);
@@ -692,17 +704,17 @@ void HaCWifiManager::_setupSTAMultiWifi(bool isStartup)
           this->_setupSTASingleWifi(isStartup);
           return;
      }
-     DEBUG_CALLBACK_HAC("Setting up STA multi wifi..");
+     DEBUG_CALLBACK_HAC(F("Setting up STA multi wifi.."));
 
      //Clean previous scan
      WiFi.scanDelete();
-     DEBUG_CALLBACK_HAC("Deleted previous scan.");
+     DEBUG_CALLBACK_HAC(F("Deleted previous scan."));
      //Remove previous wifi ssid&password
      WiFi.disconnect();
-     DEBUG_CALLBACK_HAC("Previous wifi session ssid/password.");
+     DEBUG_CALLBACK_HAC(F("Previous wifi session ssid/password."));
      //Start wifi scan
      WiFi.scanNetworks(true);
-     DEBUG_CALLBACK_HAC("Start wifi scan in async mode");
+     DEBUG_CALLBACK_HAC(F("Start wifi scan in async mode"));
 
      this->_wifiScanCountAttempt = 0;
      
@@ -718,7 +730,7 @@ void HaCWifiManager::_setupSTAMultiWifi(bool isStartup)
                                            {
                                                 this->_wifiScanFail = true;
                                                 this->_printError(11);
-                                                DEBUG_CALLBACK_HAC("Wifi scan failed or timeout.");
+                                                DEBUG_CALLBACK_HAC(F("Wifi scan failed or timeout."));
                                                 this->_wifiScanTimer.stop();
                                            }
                                            return;
@@ -729,12 +741,12 @@ void HaCWifiManager::_setupSTAMultiWifi(bool isStartup)
                                            this->_wifiScanTimer.stop();
                                       else
                                            return;
-
-                                      DEBUG_CALLBACK_HAC(String("Wifi scan success. Total AP found = " + String(count)).c_str());
+                                   
+                                      DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG104, count);
 
                                       if (!this->_scanWifiListRssi(count))
                                       {
-                                           DEBUG_CALLBACK_HAC("Warning: None of ssid listed was found from the scanning.");
+                                           DEBUG_CALLBACK_HAC(F("Warning: None of ssid listed was found from the scanning."));
                                            this->_printError(12);
                                       }
                                       else
@@ -742,7 +754,7 @@ void HaCWifiManager::_setupSTAMultiWifi(bool isStartup)
 
                                       this->_setupSTASingleWifi();
 
-                                      DEBUG_CALLBACK_HAC("Multiwifi setup done.");
+                                      DEBUG_CALLBACK_HAC(F("Multiwifi setup done."));
                                  });
      this->_wifiScanTimer.begin();
 }
@@ -760,7 +772,7 @@ bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
      bool hidden;
      bool atleastOneSsidListFoundFlag = false;
 
-     DEBUG_CALLBACK_HAC("Scanning Wifi AP Rssi..");
+     DEBUG_CALLBACK_HAC(F("Scanning Wifi AP Rssi.."));
      for (uint8_t i = 0; i < totalAP; i++)
      {
           // Get network information
@@ -770,13 +782,13 @@ bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
           for (auto entry : this->_wifiParam.wifiInfo)
           {
                // Check SSID
-               DEBUG_CALLBACK_HAC(String("scan ssid = " + ssid + " listed ssid = " + entry.ssid).c_str());
                if (ssid == entry.ssid)
                {
                     // Known network
                     atleastOneSsidListFoundFlag = true;
                     this->_wifiParam.wifiInfo[j].rssi = WiFi.RSSI(i);
-                    DEBUG_CALLBACK_HAC(String("Wifi listed ssid = " + ssid + " rssi = " + String(this->_wifiParam.wifiInfo[j].rssi)).c_str());
+                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG105, ssid.c_str());
+                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG106, this->_wifiParam.wifiInfo[j].rssi);
                }
                j++;
           }
@@ -791,7 +803,7 @@ bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
      */
 void HaCWifiManager::_sortWifiRssi()
 {
-     DEBUG_CALLBACK_HAC("Sorting Wifi AP based on Rssi");
+     DEBUG_CALLBACK_HAC(F("Sorting Wifi AP based on Rssi"));
      for (uint8_t i = 0; i < this->_wifiParam.getWifiListCount(); i++)
      {
           for (uint8_t j = 0; j < this->_wifiParam.getWifiListCount(); j++)
@@ -806,7 +818,8 @@ void HaCWifiManager::_sortWifiRssi()
                }
           }
      }
-     DEBUG_CALLBACK_HAC(String("Strongest RSSI =>" + this->_wifiParam.wifiInfo[0].ssid).c_str());
+
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG107, this->_wifiParam.wifiInfo[0].ssid.c_str());
 }
 
 /**
@@ -814,7 +827,7 @@ void HaCWifiManager::_sortWifiRssi()
      */
 void HaCWifiManager::_setupSTASingleWifi(bool isStartUp)
 {
-     DEBUG_CALLBACK_HAC("Setting up single STA wifi..");
+     DEBUG_CALLBACK_HAC(F("Setting up single STA wifi.."));
      if (isStartUp)
      {
           delay(1000);
@@ -845,10 +858,10 @@ void HaCWifiManager::_startStation(const char *ssid, const char *pass)
           this->_manualStaNetworkSetupSuccess = this->_setupNetworkManually(NETWORK_STATION);
 
      /* #region Debug */
-     DEBUG_CALLBACK_HAC("Setting up station..");
-     DEBUG_CALLBACK_HAC("WIFI_STA = true");
-     DEBUG_CALLBACK_HAC(String("SSID = " + String(ssid)).c_str());
-     DEBUG_CALLBACK_HAC(String("PASS = " + String(pass)).c_str());
+     DEBUG_CALLBACK_HAC(F("Setting up station.."));
+     DEBUG_CALLBACK_HAC(F("WIFI_STA = true"));
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG114, ssid);
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG108, pass);
      /* #endregion */
      //Start wifi network
      WiFi.begin(ssid, pass);
@@ -875,36 +888,36 @@ bool HaCWifiManager::_setupNetworkManually(NetworkType netWorkType)
      if(netWorkType == NETWORK_AP) 
           netInfo = this->_wifiParam.apNetworkInfo;     
 
-     DEBUG_CALLBACK_HAC("Setting up network manually..");
+     DEBUG_CALLBACK_HAC(F("Setting up network manually.."));
      IPAddress ip, gw, sn, pdns, sdns;
      if (!ip.fromString(netInfo.ip))
      {
           this->_printError(3);
-          DEBUG_CALLBACK_HAC(String("Failed to setup IP(" + String(netInfo.ip) + ") manually..").c_str());
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG109, netInfo.ip.c_str());
           return false;
      }
      if (!sn.fromString(netInfo.sn))
      {
           this->_printError(4);
-          DEBUG_CALLBACK_HAC(String("Failed to setup subnet(" + String(netInfo.sn) + ") manually..").c_str());
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG110, netInfo.sn.c_str());
           return false;
      }
      if (!gw.fromString(netInfo.gw))
      {
           this->_printError(5);
-          DEBUG_CALLBACK_HAC(String("Failed to setup gateway(" + String(netInfo.gw) + ") manually..").c_str());
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG111, netInfo.gw.c_str());
           return false;
      }
      if (!pdns.fromString(netInfo.pdns) && netWorkType == NETWORK_STATION)
      {
           this->_printError(6);
-          DEBUG_CALLBACK_HAC(String("Failed to setup primary dns(" + String(netInfo.pdns) + ") manually..").c_str());
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG112, netInfo.pdns.c_str());
           return false;
      }
      if (!sdns.fromString(netInfo.sdns) && netWorkType == NETWORK_STATION)
      {
           this->_printError(7);
-          DEBUG_CALLBACK_HAC(String("Failed to setup secondary dns(" + String(netInfo.sdns) + ") manually..").c_str());
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG113, netInfo.sdns.c_str());
           return false;
      }
 
@@ -913,7 +926,7 @@ bool HaCWifiManager::_setupNetworkManually(NetworkType netWorkType)
           if (!WiFi.config(ip, gw, sn, pdns, sdns))
           {
                this->_printError(81);
-               DEBUG_CALLBACK_HAC("Network manual configuration failed for Station.");
+               DEBUG_CALLBACK_HAC(F("Network manual configuration failed for Station."));
                return false;
           }
      }
@@ -922,16 +935,13 @@ bool HaCWifiManager::_setupNetworkManually(NetworkType netWorkType)
           if (!WiFi.softAPConfig(ip, gw, sn))
           {
                this->_printError(82);
-               DEBUG_CALLBACK_HAC(netInfo.ip.c_str());
-               DEBUG_CALLBACK_HAC(netInfo.gw.c_str());
-               DEBUG_CALLBACK_HAC(netInfo.sn.c_str());
-               DEBUG_CALLBACK_HAC("Network manual configuration failed for Access Point.");
+               DEBUG_CALLBACK_HAC(F("Network manual configuration failed for Access Point."));
                return false;
           }
      }
 
 
-     DEBUG_CALLBACK_HAC("Network successfully setup manually.");
+     DEBUG_CALLBACK_HAC(F("Network successfully setup manually."));
 
      return true;
 }
@@ -951,15 +961,15 @@ void HaCWifiManager::_startAccessPoint()
      }
 
      /* #region Debug */
-     DEBUG_CALLBACK_HAC(String("AP SSID = " + this->_wifiParam.accessPointInfo.ssid).c_str());
-     DEBUG_CALLBACK_HAC(String("AP PASS = " + this->_wifiParam.accessPointInfo.pass).c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG114, this->_wifiParam.accessPointInfo.ssid.c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG115, this->_wifiParam.accessPointInfo.pass.c_str());
      /* #endregion */
 
      //Raise error if ap ssid or password is empty
      if (this->_wifiParam.accessPointInfo.ssid == "" || this->_wifiParam.accessPointInfo.pass == "")
      {
           this->_printError(9);
-          DEBUG_CALLBACK_HAC("Invalid access point parameters.");
+          DEBUG_CALLBACK_HAC(F("Invalid access point parameters."));
           return;
      }
 
@@ -974,11 +984,11 @@ void HaCWifiManager::_startAccessPoint()
           this->_printError(10);
           DEBUG_CALLBACK_HAC(this->_wifiParam.accessPointInfo.ssid.c_str());
           DEBUG_CALLBACK_HAC(this->_wifiParam.accessPointInfo.pass.c_str());
-          DEBUG_CALLBACK_HAC("Failed to setup access point.");
+          DEBUG_CALLBACK_HAC(F("Failed to setup access point."));
           return;
      }
      this->_apFlagStarted = true;
-     DEBUG_CALLBACK_HAC("Access point successfully setup.");
+     DEBUG_CALLBACK_HAC(F("Access point successfully setup."));
 }
 
 /**
@@ -986,7 +996,7 @@ void HaCWifiManager::_startAccessPoint()
      */
 void HaCWifiManager::_generateAccessPointInformation()
 {
-     DEBUG_CALLBACK_HAC("Generating Access point information..");
+     DEBUG_CALLBACK_HAC(F("Generating Access point information.."));
      //Setting memory
      memset(this->_defaultAccessPointID, 0, sizeof(this->_defaultAccessPointID));
      memset(this->_defaultAccessPointPass, 0, sizeof(this->_defaultAccessPointPass));
