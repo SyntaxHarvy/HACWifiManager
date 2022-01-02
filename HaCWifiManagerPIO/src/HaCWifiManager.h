@@ -51,13 +51,23 @@
     {                                \
         HaCWifiManager::_debug(msg); \
     }
-
+#define DEBUG_CALLBACK_HAC2(msg, ...)               \
+    {                                               \
+        char buffer [255];                          \
+			snprintf_P(                             \
+				buffer, sizeof(buffer),             \
+				msg,  \
+				##__VA_ARGS__ \
+			);                                      \
+        HaCWifiManager::_debug((const char*)buffer); \
+    }
 #else
 
 #define DEBUG_MSG_HAC_WIFI(msg, ...)
 #define DEBUG_MSG_HAC_WIFI_LN(msg)
 #define DEBUG_MSG_HAC_WIFI_SERIAL_INIT()
 #define DEBUG_CALLBACK_HAC(msg)
+#define DEBUG_CALLBACK_HAC2(msg, ...)
 
 #endif
 
@@ -217,6 +227,7 @@ private:
     uint8_t _previousAPClientCount = 0;
 
     void _debug(const char *data); // Function prototype declaration for debug function
+    void _debug(const __FlashStringHelper* data);
     void _printError(uint8_t errorCode);
     void _initWifiManager();
     void _initStation(bool isStartUp = true);

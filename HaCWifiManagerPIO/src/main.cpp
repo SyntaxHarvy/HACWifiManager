@@ -1,52 +1,93 @@
 /**
  *
- * @file BasicWifiMngrSetup.ino
+ * @file BasicWifiJsonParameter.ino
  * @date 26.11.2021
  * @author Harvy Aronales Costiniano
  *
- * Basic setup of wifi manager without using Json parameter
- * This example will explore other parameters define on the constructor
- * Setup function parameters define as below:
- *     void setup(
-        const char *defaultSSID,              - Required
-        const char *defaultPass,              - Required
-        const char *hostName = "hacwfmhost",  - Optional with default value
-        WifiMode mode = STA_ONLY,             - Optional with default value
-        bool enableMultiWifi = true,          - Optional with default value
-        bool enableDHCPNetwork = true,        - Optional with default value
-        const char *staIp = "10.0.1.100",     - Optional with default value
-        const char *staGw = "255.255.255.0",  - Optional with default value
-        const char *staSn = "0.0.0.0",        - Optional with default value
-        const char *staPdns = "0.0.0.0",      - Optional with default value
-        const char *staSdns = "0.0.0.0",      - Optional with default value
-        const char *apSsid = "hacAP",         - Optional with default value
-        const char *apPass = "appass",        - Optional with default value
-        const char *apIp = "10.0.10.1",       - Optional with default value
-        const char *apSn = "255.255.255.0",   - Optional with default value
-        const char *apGw = "10.0.10.1"        - Optional with default value        
-        )
+ * Setting-up wifi manager from json
+ * Json data format will be passed on the constructor of the wifimanager
+ * setup function.
+ * JSON FORMAT:
+ * {
+ *    "mode" : 1-3 Integer format(Station only =1, AP only = 2, both = 3),
+ *    "enable_multi_wifi" : true or false,
+ *    "enable_dhcp_network_sta": true or false,
+ *    "enable_dhcp_network_ap": true or false,
+ *    "host_name" : name of the host in string format e.g. "myhost",
+ *    "wifilist" : 
+ *    {
+           "0" : {
+                  "ssid": in string format e.g "myssid", 
+                  "password" : in string format e.g "mypassword"
+                 },            
+           "1" : {
+                  "ssid": in string format e.g "myssid2", 
+                  "password" : in string format e.g "mypassword2"
+                 },            
+           .......            
+      },
+      "ap" : 
+      {
+          "ssid" : in string format e.g "mydefaultAP",
+          "pass" : in string format e.g "mydefaultAPPass"
+      },      
+      "sta_network": 
+      {
+         "ip" : in string format e.g "10.0.0.56",
+         "sn" : in string format e.g "255.255.255.0",
+         "gw" : in string format e.g "10.0.0.1",
+         "pdns" in string format e.g : "8.8.8.8",
+         "sdns" in string format e.g : "8.8.8.1"
+      },  
+      "ap_network": 
+      {
+         "ip" : in string format e.g "10.0.10.51",
+         "sn" : in string format e.g "255.255.255.0",
+         "gw" : in string format e.g "10.0.10.1"
+      }
+ Note: 
+    ip format for network string parameters should be valid.         
+ *    
+ * }
  * 
- * Wifi Manager Mode:
- * enum WifiMode
-  {
-    STA_ONLY = 1,    // Station mode only
-    AP_ONLY = 2,     // Access point mode only
-    BOTH_STA_AP = 3, // Both station and access point mode
-  }
- * Wifi Manager Network Type:
- * enum NetworkType
-  {
-    NETWORK_STATION = 1, // Network for Station
-    NETWORK_AP  = 2,     // Network for Access point
-  }
  * This example code is in the public domain.
- * https://github.com/SyntaxHarvy/HACWifiManager.git
+ * https://github.com/SyntaxHarvy/HACWifiManager
  */
 
-#include <HACWifiManager.h>
+#include <HaCWifiManager.h>
 
 //Instantiate wifimanager
 HaCWifiManager gHaCWifiManager;
+
+//Construction of Json parameters
+static const char wifidata[] PROGMEM =
+  R"(   {
+       "mode" : 3,
+       "enable_multi_wifi" : true,
+       "enable_dhcp_network_sta" : true,
+       "enable_dhcp_network_ap" : true,
+       "host_name" : "hacwfmhost",
+       "wifilist" : {
+           "0" : {"ssid": "ssid1", "password" : "password1"},            
+           "1" : {"ssid": "ssid2", "password" : "password2"}            
+        },
+        "ap" : {
+          "ssid" : "mydefaultAP",
+          "pass" : "mydefaultAPPass"
+        },
+        "sta_network": {
+           "ip" : "10.0.0.56",
+           "sn" : "255.255.255.0",
+           "gw" : "10.0.0.1",
+           "pdns" : "8.8.8.8",
+           "sdns" : "8.8.8.1"
+        },
+        "ap_network": {
+           "ip" : "10.0.10.51",
+           "sn" : "255.255.255.0",
+           "gw" : "10.0.10.1"
+        }
+    })";
 
 //Wifi Manager Events Callback function prototypes
 void onDebugCB(const char *msg);                // onDebug Event
@@ -84,16 +125,6 @@ void setup() {
   //onAPNewConnection Event
   gHaCWifiManager.onAPNewConnection(onAPNewConnectionCB);
 
-  //Setup will start the wifimanager
-  //Visit : https://github.com/SyntaxHarvy/HACWifiManager.git
-  //For the detail of the setup parameters
-  //Note: First wifi ssid/pass is define on the setup function
-  
-  gHaCWifiManager.addWifiList("ssid2", "password2");
-  gHaCWifiManager.addWifiList("ssid3", "pass3");
-  gHaCWifiManager.addWifiList("ssid4", "pass4");
-  gHaCWifiManager.addWifiList("ssid5", "pass5");
-  
   //Setting wifi Options
   //Default settings
   //gHaCWifiManager.setWifiOptions();
@@ -106,49 +137,9 @@ void setup() {
                         WIFI_PHY_MODE_11G         //Wifi Physical mode
   );
 
-  
-  //Note: First wifi ssid/pass is define on the setup function
-  //Option 1:
-  /*gHaCWifiManager.setup("ssid1",                   //default Station SSID
-                       "password1",            //default Station Password
-                       "myHostName",              //Device hostname
-                       BOTH_STA_AP,               //Wifi manager will act as both station & access point only 
-                       true,                      //Enable multi wifi  
-                       false,                     //Enable DCHP for Station
-                       false,                     //Enable DHCP for Access point
-                       "10.0.0.14",               //Station IP Address
-                       "255.255.255.0",           //Station subnet
-                       "10.0.0.1",                //Station gateway
-                       "0.0.0.0",                 //Station primary dns
-                       "0.0.0.0",                 //Station secondary dns
-                       "myapssid",                //AP ssid
-                       "myappassword",            //AP password
-                       "192.168.100.1",           //AP IP Address      
-                       "255.255.255.0",           //AP subnet         
-                       "192.168.100.1"            //AP gateway
-                       );
-                       */
- //Option 2:
- gHaCWifiManager.setEnableMultiWifi(true);        //Enable multiwifi
- gHaCWifiManager.setMode(BOTH_STA_AP);            //Wifi manager will act as both station & access point only
- gHaCWifiManager.setEnableDHCPNetwork(false, false);//First parameter is DHCP enable for station while 2nd parameter is the DHCP enable for Access point
- gHaCWifiManager.setNetWorkInformation(
-                       "10.0.0.14",               //Station IP Address
-                       "255.255.255.0",           //Station subnet
-                       "10.0.0.1",                //Station gateway
-                       "0.0.0.0",                 //Station primary dns
-                       "0.0.0.0",                 //Station secondary dns
-                       "192.168.100.1",           //AP IP Address      
-                       "255.255.255.0",           //AP subnet         
-                       "192.168.100.1"            //AP gateway
-  );
-  gHaCWifiManager.setAPInfo("myapssid", "myappassword");
-  gHaCWifiManager.setup();
-  //Print the wifimanager configuration in Json format
-   String jsonConfig;
-  gHaCWifiManager.getWifiConfigJson(&jsonConfig);
-  Serial.printf("Wifi Manager Configuration : %s \n", jsonConfig.c_str());
 
+ //Setup will start the wifimanager
+ gHaCWifiManager.setup(String(wifidata).c_str());
 }
 
 void loop() {
