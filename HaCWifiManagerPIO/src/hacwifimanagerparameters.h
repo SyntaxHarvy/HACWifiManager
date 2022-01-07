@@ -28,7 +28,7 @@
 /* #region CONSTANT_DEFINITION */
 #define MAX_WIFI_INFO_LIST 5 // Maximum wifi information
 
-#ifdef DEBUG_ESP_PORT
+#if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
 
 #define DEBUG_HAC_WIFI_PARAM Serial // Custom serial debug
 #define DEBUG_MSG_HAC_WIFI_PARAM(msg, ...)               \
