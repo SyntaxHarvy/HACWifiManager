@@ -32,7 +32,8 @@
 #define DEFAULT_HOST_NAME "HACWIFIMNGRHOST"
 #define WIFI_SCAN_TIMEOUT 1000   
 #define MAX_WIFI_SCAN_ATTEMPT 3
-#ifdef DEBUG_ESP_PORT
+
+#if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
 
 #define DEBUG_HAC_WIFI Serial // Custom serial debug
 #define DEBUG_MSG_HAC_WIFI(msg, ...)               \
