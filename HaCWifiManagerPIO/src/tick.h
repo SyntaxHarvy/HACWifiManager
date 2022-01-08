@@ -54,4 +54,6 @@ class Tick{
 };
 /* #endregion Common class */
 
+#include "tick-impl.h"
+
 #endif

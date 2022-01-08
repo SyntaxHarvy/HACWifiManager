@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __AMPWIFI_MANAGER_H_
-#define __AMPWIFI_MANAGER_H_
+#ifndef __HACWIFI_MANAGER_H_
+#define __HACWIFI_MANAGER_H_
 
 /* #region CONSTANT_DEFINITION */
 
@@ -77,6 +77,7 @@
 /* #endregion */
 
 /* #region INTERNAL_DEPENDENCY */
+#include "HaCWifiManagerStringConst.h"
 #include "hacwifimanagerparameters.h"
 #include "tick.h"
 /* #endregion */
@@ -243,5 +244,7 @@ private:
     int _generateWifiMacStrLower();
 };
 /* #endregion */
+
+#include "HaCWifiManager-impl.h"
 
 #endif
