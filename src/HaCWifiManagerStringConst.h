@@ -33,7 +33,7 @@
 #define HAC_WFM_STRING_CONST2 "}"
 
 
-#ifdef DEBUG_ESP_PORT
+#if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
 /* #region Verbose Message String Constant */
 
 const char HAC_WFM_VERBOSE_MSG1[] PROGMEM = "Hostname = %s";

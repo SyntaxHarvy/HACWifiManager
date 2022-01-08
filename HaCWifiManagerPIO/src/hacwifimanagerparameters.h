@@ -1,6 +1,6 @@
 /**
  *
- * @file hacwifimanagerparameters.h
+ * @file HaCwifimanagerparameters.h
  * @date 26.11.2021
  * @author Harvy Aronales Costiniano
  *
@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __AMPWIFI_MANAGER_PARAMETERS_H_
-#define __AMPWIFI_MANAGER_PARAMETERS_H_
+#ifndef __HACWIFI_MANAGER_PARAMETERS_H_
+#define __HACWIFI_MANAGER_PARAMETERS_H_
 
 /* #region CONSTANT_DEFINITION */
 #define MAX_WIFI_INFO_LIST 5 // Maximum wifi information
@@ -69,7 +69,7 @@
 
 /* #endregion */
 
-/* #region EXTERNAL_DEPENDENCY */
+/* #region INTERNAL_DEPENDENCY */
 #include "HaCWifiManagerStringConst.h"
 /* #endregion */
 
@@ -171,4 +171,7 @@ private:
 };
 
 /* #endregion */
+
+#include "HaCwifimanagerparameters-impl.h"
+
 #endif

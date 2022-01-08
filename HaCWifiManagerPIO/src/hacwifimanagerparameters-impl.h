@@ -1,6 +1,6 @@
 /**
  *
- * @file hacwifimanagerparameters.cpp
+ * @file HaCwifimanagerparameters-impl.h
  * @date 26.11.2021
  * @author Harvy Aronales Costiniano
  *
@@ -23,7 +23,7 @@
  */
 
 /* #region SELF_HEADER */
-#include "hacwifimanagerparameters.h"
+#include "HaCwifimanagerparameters.h"
 /* #endregion */
 
 /* #region EXTERNAL_DEPENDENCY */
@@ -125,9 +125,10 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
                this->wifiInfo.push_back(w);
 
                /* #region Debug */
-               #ifdef DEBUG_ESP_PORT
+               #if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
                uint8_t index = this->wifiInfo.size() - 1;
                #endif
+               
                DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG13, index);
                DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG14, this->wifiInfo[index].ssid.c_str());
                DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG15, this->wifiInfo[index].pass.c_str());

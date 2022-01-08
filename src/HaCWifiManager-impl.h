@@ -1,6 +1,6 @@
 /**
  *
- * @file hacwifimanager.cpp
+ * @file hacwifimanager-impl.h
  * @date 26.11.2021
  * @author Harvy Aronales Costiniano
  *
@@ -24,7 +24,7 @@
 
 
 /* #region SELF_HEADER */
-#include "hacwifimanager.h"
+#include "HaCwifimanager.h"
 /* #endregion */
 
 /* #region CLASS_DEFINITION */
