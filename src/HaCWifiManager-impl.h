@@ -51,6 +51,7 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 8192);
      DeserializationError error = deserializeJson(doc, wifiJsonStr);
      doc.shrinkToFit();
+     
      if (!error)
      {
           DEBUG_CALLBACK_HAC(F("Data is a valid json."));
@@ -58,6 +59,7 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
           this->_generateWifiMacStrLower();
           this->_wifiParam.setHostName(String(String(DEFAULT_HOST_NAME) + String(this->_wifiMacAddress)).c_str());
           //Json data is a valid json format hence it will be safe to be process by the wifi parameter class
+          
           this->_wifiParam.fromJson(wifiJsonStr);
 
           //Setting up wifi Core
@@ -204,6 +206,24 @@ String HaCWifiManager::getStaIP()
 }
 
 /**
+     * Getting station ip in string.  
+     * @param ip IP in char pointer
+     */
+void HaCWifiManager::getStaIP(char *ip)
+{
+     //Serial.printf("IP addess %d\n",(int)ip);
+     const char *ptr = this->getAPIP().c_str();
+     //Serial.println(WiFi.localIP().toString());
+     char c;
+     uint8_t i = 0;
+     while((c = *(ptr++)))
+          ip[i++] = c;
+     
+     //Serial.printf("IP addess %d \n",(int)ip);
+     //Serial.printf("IP addess %s \n",&ip[0]);
+}
+
+/**
      * Getting Access Point ip in string.  
      * @return IP in string format.        
      */
@@ -321,9 +341,9 @@ String HaCWifiManager::getHostName()
 /**
      * Getting the wifimanager configuration in Json string
      */
-void HaCWifiManager::getWifiConfigJson(String *jsonConfig)
+void HaCWifiManager::getWifiConfigJson(char *jsonConfig, uint16_t size)
 {
-     this->_wifiParam.toJson(jsonConfig);
+     this->_wifiParam.toJson(jsonConfig, size);
 }
 
 /**
@@ -452,6 +472,7 @@ void HaCWifiManager::loop()
                if(MDNS.begin(hostName))
                {
                     DEBUG_CALLBACK_HAC(F("MDNS Started."));
+                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG116, hostName.c_str());
                     this->_initMdnsFlagOnce = true;
                }
                else
