@@ -70,6 +70,7 @@ const char HAC_WFM_VERBOSE_MSG112[] PROGMEM = "Failed to setup Pri. DNS manually
 const char HAC_WFM_VERBOSE_MSG113[] PROGMEM = "Failed to setup Sec. DNS manually = %s";
 const char HAC_WFM_VERBOSE_MSG114[] PROGMEM = "AP SSID = %s";
 const char HAC_WFM_VERBOSE_MSG115[] PROGMEM = "AP PASS = %s";
+const char HAC_WFM_VERBOSE_MSG116[] PROGMEM = "MDNS = %s.local";
 
 
 /* #endregion */

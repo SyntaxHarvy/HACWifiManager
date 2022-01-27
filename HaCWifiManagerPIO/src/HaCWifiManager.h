@@ -164,7 +164,7 @@ public:
 
     void setHostName(const char *hostName);
     String getHostName();
-    void getWifiConfigJson(String *jsonConfig);
+    void getWifiConfigJson(char *jsonConfig, uint16_t size);
 
     void addWifiList(const char *ssid, const char *pass);
     bool editWifiList(const char *oldSsid, const char *oldPass,
@@ -177,6 +177,7 @@ public:
     void shutdown();
 
     String getStaIP();
+    void getStaIP(char *ip);
     String getAPIP();
 
     /* Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7 */

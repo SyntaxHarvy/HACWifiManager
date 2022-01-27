@@ -54,6 +54,7 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 8192);
      DeserializationError error = deserializeJson(doc, jsonStr);
      doc.shrinkToFit();
+
      if (!error)
      {
           this->_mode = doc["mode"].as<uint8_t>();
@@ -141,7 +142,7 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
      * Convert HACWifiManagerParameters class into Json *
      * @param jsonStr Wifi parameters in json format as const char *.
      */
-void HACWifiManagerParameters::toJson(String *jsonConfig)
+void HACWifiManagerParameters::toJson(char * jsonConfig, uint16_t size)
 {
 
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
@@ -171,8 +172,7 @@ void HACWifiManagerParameters::toJson(String *jsonConfig)
      }
 
      doc.shrinkToFit();
-     serializeJson(doc, (*jsonConfig));
-
+     serializeJson(doc, jsonConfig, size);
 }
 
 /**
