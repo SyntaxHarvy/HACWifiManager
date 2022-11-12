@@ -196,40 +196,127 @@ WifiMode HaCWifiManager::getMode()
      return (WifiMode)this->_wifiParam.getMode();
 }
 
-/**
-     * Getting station ip in string.  
-     * @return IP in string format.        
-     */
-String HaCWifiManager::getStaIP()
-{
-     return WiFi.localIP().toString();
-}
 
 /**
-     * Getting station ip in string.  
+     * Getting station ip .  
      * @param ip IP in char pointer
      */
 void HaCWifiManager::getStaIP(char *ip)
-{
-     //Serial.printf("IP addess %d\n",(int)ip);
-     const char *ptr = this->getAPIP().c_str();
-     //Serial.println(WiFi.localIP().toString());
-     char c;
-     uint8_t i = 0;
-     while((c = *(ptr++)))
-          ip[i++] = c;
-     
-     //Serial.printf("IP addess %d \n",(int)ip);
-     //Serial.printf("IP addess %s \n",&ip[0]);
+{     
+     strcpy(ip, &(WiFi.localIP().toString())[0]);
 }
 
 /**
-     * Getting Access Point ip in string.  
-     * @return IP in string format.        
+     * Getting station subnet .  
+     * @param sn Subnet pointer address
      */
-String HaCWifiManager::getAPIP()
-{
-     return WiFi.softAPIP().toString();
+void HaCWifiManager::getStaSubnetMask(char *sn)
+{     
+     strcpy(sn, &(WiFi.subnetMask().toString())[0]);
+}
+
+/**
+     * Getting station gateway .  
+     * @param gw Gateway pointer address
+     */
+void HaCWifiManager::getGateway(char *gw)
+{     
+     strcpy(gw, &(WiFi.gatewayIP().toString())[0]);
+}
+
+/**
+     * Getting Access Point IP.  
+     * @param ip Access point IP
+     */
+void HaCWifiManager::getAPIP(char *ip)
+{  
+     struct ip_info info;   
+     wifi_get_ip_info(SOFTAP_IF, &info);     
+     strcpy(ip, &(IPAddress(info.ip.addr).toString())[0]);
+}
+
+/**
+     * Getting station gateway .  
+     * @param sn Access point subnet pointer
+     */
+void HaCWifiManager::getAPSubnet(char *sn)
+{  
+     struct ip_info info;   
+     wifi_get_ip_info(SOFTAP_IF, &info);     
+     strcpy(sn, &(IPAddress(info.netmask.addr).toString())[0]);
+}
+
+/**
+     * Getting station gateway .  
+     * @param gw Access point gateway pointer
+     */
+void HaCWifiManager::getAPGateway(char *gw)
+{  
+     struct ip_info info;   
+     wifi_get_ip_info(SOFTAP_IF, &info);     
+     strcpy(gw, &(IPAddress(info.gw.addr).toString())[0]);
+}
+
+/**
+     * Getting network dns1.  
+     * @param dns1 DNS server1 
+     */
+void HaCWifiManager::getDNS1(char *dns1)
+{  
+     struct ip_info info;
+     dns_getserver(0)->addr;
+     info.ip.addr = dns_getserver(1)->addr;
+
+     strcpy(dns1, &(IPAddress(info.ip.addr).toString())[0]);
+}
+
+/**
+     * Getting network dns2.  
+     * @param dns2 DNS server2 
+     */
+void HaCWifiManager::getDNS2(char *dns1)
+{  
+     struct ip_info info;
+     dns_getserver(1)->addr;
+     info.ip.addr = dns_getserver(1)->addr;
+
+     strcpy(dns1, &(IPAddress(info.ip.addr).toString())[0]);
+}
+
+/**
+     * Getting station ssid.  
+     * @param ssid Station ssid pointer address
+     */
+void HaCWifiManager::getSTAWifiSSID(char *ssid)
+{  
+     strcpy(ssid, &(WiFi.SSID())[0]);
+}
+
+/**
+     * Getting station wifi password.  
+     * @param wifiPass Station wifi password pointer address
+     */
+void HaCWifiManager::getSTAWifiPassword(char *wifiPass)
+{  
+     strcpy(wifiPass, &(this->_wifiParam.wifiInfo[0].pass)[0]);
+}
+
+/**
+     * Getting Access Point ssid.   
+     * @param apPassword Access point ssid pointer address
+     */
+void HaCWifiManager::getAPWifiSSID(char *ssid)
+{  
+     strcpy(ssid, &(WiFi.softAPSSID())[0]);
+}
+
+/**
+     * Getting access point wifi password.  
+     * @param wifiPass Access point wifi password pointer address
+     */
+void HaCWifiManager::getAPWifiPassword(char *wifiPass)
+{  
+     strcpy(wifiPass, &(this->_wifiParam.accessPointInfo.pass)[0]);
 }
 
 
@@ -260,6 +347,7 @@ void HaCWifiManager::setEnableDHCPNetwork(bool enableSta, bool enableAp)
 {
      this->_wifiParam.setEnableDHCPNetwork(enableSta, enableAp);
 }
+
 
 /**
      * Getting DHCP Enable flag.   
