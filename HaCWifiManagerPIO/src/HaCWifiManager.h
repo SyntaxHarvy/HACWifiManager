@@ -88,6 +88,11 @@
 #if defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
+extern "C" {
+#include "lwip/err.h"
+#include "lwip/dns.h"
+#include "lwip/dhcp.h"
+}
 #endif
 
 #if defined(ESP32)
@@ -176,9 +181,21 @@ public:
     void shutdownSTA();
     void shutdown();
 
-    String getStaIP();
+
     void getStaIP(char *ip);
-    String getAPIP();
+    void getStaSubnetMask(char *sn);
+    void getGateway(char *gw);
+    void getAPIP(char *ip);
+    void getAPSubnet(char *sn);
+    void getAPGateway(char *gw);
+    void getDNS1(char *dns1);
+    void getDNS2(char *dns2);
+    void getSTAWifiSSID(char *ssid);
+    void getSTAWifiPassword(char *wifiPass);
+    void getAPWifiSSID(char *ssid);
+    void getAPWifiPassword(char *ssid);
+
+
 
     /* Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7 */
     void setWifiOptions(
@@ -228,6 +245,7 @@ private:
     Tick _staWatchdogTimer;
     uint8_t _wifiScanCountAttempt = 0;
     uint8_t _previousAPClientCount = 0;
+
 
     void _debug(const char *data); // Function prototype declaration for debug function
     void _debug(const __FlashStringHelper* data);
