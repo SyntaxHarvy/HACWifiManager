@@ -88,6 +88,11 @@
 #if defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
+extern "C" {
+#include "lwip/err.h"
+#include "lwip/dns.h"
+#include "lwip/dhcp.h"
+}
 #endif
 
 #if defined(ESP32)
@@ -96,9 +101,13 @@
 #endif
 
 #include <ArduinoJson.h>
+#include <LittleFS.h>
 /* #endregion */
 
 /* #region GLOBAL_DECLARATION */
+#define ___FILE_NAME___ "/wifi.info"
+#define ___DEF_SSID___ "myIOTAP"
+#define ___DEF_PASS___ "password"
 typedef std::function<void()> tListGenCbFnHaC;                      // Standard void function with non-return value
 typedef std::function<void(const char *)> tListGenCbFnHaC1StrParam; // Standard void function with non-return value
 
@@ -116,6 +125,8 @@ class HaCWifiManager
 {
 public:
     HaCWifiManager(); // Constructor
+    ~HaCWifiManager();
+
     void setup(const char *wifiJsonStr);
     void setup(
         const char *defaultSSID,
@@ -136,6 +147,7 @@ public:
         const char *apSn = "255.255.255.0",
         const char *apGw = "0.0.0.0"        
         );
+    
     void setup(); // Function called on setting up the wifi manager Core
 
     void loop(); // Function called at the loop routine of the wifi
@@ -176,10 +188,18 @@ public:
     void shutdownSTA();
     void shutdown();
 
-    String getStaIP();
-    void getStaIP(char *ip);
-    String getAPIP();
 
+    void getStaIP(char *ip);
+    void getStaSubnetMask(char *sn);
+    void getGateway(char *gw);
+    void getAPIP(char *ip);
+    void getAPSubnet(char *sn);
+    void getAPGateway(char *gw);
+    void getDNS1(char *dns1);
+    void getDNS2(char *dns2);
+    void getSTAWifiSSID(char *ssid);    
+    void getAPWifiSSID(char *ssid);
+    
     /* Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7 */
     void setWifiOptions(
         bool persistent = false,
@@ -201,7 +221,7 @@ public:
     void onAPNewConnection(tListGenCbFnHaC1StrParam fn);
 private:
 
-    HACWifiManagerParameters _wifiParam;       // Private declaration of AMPWifiManagerData
+    HACWifiManagerParameters *_wifiParam = nullptr;       // Private declaration of AMPWifiManagerData
     tListGenCbFnHaC1StrParam _onDebugFn;       // Function callback declaration for onDebug event
     tListGenCbFnHaC1StrParam _onErrorFn;       // Function callback declaration for onError event
     tListGenCbFnHaC1StrParam _onSTAReadyFn;       // Function callback declaration for onready event
@@ -220,15 +240,15 @@ private:
     bool _wifiScanFail = false;
     bool _initMdnsFlagOnce = false;
     enum WifiMode _wifiMode; // Enum Wifi Mode
-    char _defaultAccessPointID[132];
-    char _defaultAccessPointPass[132];
-    char _wifiMacAddress[128];
+
+
     Tick _wifiScanTimer;
     Tick _staStartupTimer;
     Tick _staWatchdogTimer;
     uint8_t _wifiScanCountAttempt = 0;
     uint8_t _previousAPClientCount = 0;
 
+    
     void _debug(const char *data); // Function prototype declaration for debug function
     void _debug(const __FlashStringHelper* data);
     void _printError(uint8_t errorCode);
@@ -240,9 +260,12 @@ private:
     void _setupSTASingleWifi(bool isStartUp = true);
     bool _setupNetworkManually(NetworkType netWorkType);
     void _startStation(const char *ssid, const char *pass);
-    void _startAccessPoint();
-    void _generateAccessPointInformation();
-    int _generateWifiMacStrLower();
+    void _startAccessPoint();   
+    void _initParam();
+    void _save(); 
+    void _read(char *data); 
+   
+    
 };
 /* #endregion */
 
