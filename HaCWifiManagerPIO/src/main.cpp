@@ -96,7 +96,7 @@ void setup() {
   );
 
   //Setup will start the wifimanager
-  gHaCWifiManager.setup("ssid1", "password1");
+  gHaCWifiManager.setup("MyIOTNetA", "xtrp@ss143");
   //Print the serial configuration in Json format
   //Print the wifimanager configuration in Json format
   char *wifiConfig = new char[2000];
@@ -122,8 +122,12 @@ void onErrorCB(const char *msg){
 
 void onSTAReadyCB(const char *msg){
   //TO DO: Add here on station ready handle 
+  char ip[30];
+  memset(ip, '\0', 30);
+  gHaCWifiManager.getStaIP(ip);
+
   Serial.println("Station ready. Msg =>" + String(msg));
-  Serial.println("Station IP =>" + gHaCWifiManager.getStaIP());
+  Serial.println("Station IP =>" + String(ip));
 }
 void onSTADisconnectCB(const char *msg){
   //TO DO: Add here on station disconnect handle 
@@ -135,8 +139,12 @@ void onSTALoopCB(const char *msg){
 }
 void onAPReadyCB(const char *msg){
   //TO DO: Add here all AP ready handle
+  char ip[30];
+  memset(ip, '\0', 30);
+  gHaCWifiManager.getStaIP(ip);
+
   Serial.println("Access point is ready. =>" + String(msg));
-  Serial.println("Access Point IP =>" + gHaCWifiManager.getAPIP());
+  Serial.println("Access Point IP =>" + String(ip));
 }
 void onAPDisconnectCB(const char *msg){
   //TO DO: Add here on AP disconnect handle 
