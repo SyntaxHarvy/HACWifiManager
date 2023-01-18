@@ -42,6 +42,7 @@ HACWifiManagerParameters::HACWifiManagerParameters() {}
 HACWifiManagerParameters::~HACWifiManagerParameters()
 {
      this->wifiInfo.clear();
+     this->wifiInfo = std::vector<t_wifiInfo>();  
 }
 
 /**
@@ -57,13 +58,13 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
 
      if (!error)
      {
-          this->_mode = doc["mode"].as<uint8_t>();
-          this->_multiWifiEnable = doc["enable_multi_wifi"].as<bool>();
-          this->_dhcpStaNetworkEnable = doc["enable_dhcp_network_sta"].as<bool>();
-          this->_dhcpApNetworkEnable = doc["enable_dhcp_network_ap"].as<bool>();
+          this->_mode = doc[__MODE__].as<uint8_t>();
+          this->_multiWifiEnable = doc[__ENABLE_MULTI_WIFI__].as<bool>();
+          this->_dhcpStaNetworkEnable = doc[__ENABLE_DHCP_NETWORK_STA__].as<bool>();
+          this->_dhcpApNetworkEnable = doc[__ENABLE_DHCP_NETWORK_AP__].as<bool>();
 
-          if(doc["host_name"].as<String>() != HAC_WFM_STRING_NULL) 
-               this->_hostName = doc["host_name"].as<String>();
+          if(doc[__HOST_NAME__].as<String>() != HAC_WFM_STRING_NULL) 
+               this->_hostName = doc[__HOST_NAME__].as<String>();
           /* #region Debug */   
           DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG1, this->_hostName.c_str());       
           DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG2, this->_mode);
@@ -72,20 +73,20 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
           DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG5, this->_dhcpApNetworkEnable);
           /* #endregion */
 
-          this->staNetworkInfo.ip = doc["sta_network"]["ip"].as<String>();
-          this->staNetworkInfo.sn = doc["sta_network"]["sn"].as<String>();
-          this->staNetworkInfo.gw = doc["sta_network"]["gw"].as<String>();
-          this->staNetworkInfo.pdns = doc["sta_network"]["pdns"].as<String>();
-          this->staNetworkInfo.sdns = doc["sta_network"]["sdns"].as<String>();
+          this->staNetworkInfo.ip = doc[__STA_NETWORK__][___IP___].as<String>();
+          this->staNetworkInfo.sn = doc[__STA_NETWORK__][___SN___].as<String>();
+          this->staNetworkInfo.gw = doc[__STA_NETWORK__][___GW___].as<String>();
+          this->staNetworkInfo.pdns = doc[__STA_NETWORK__][___PDNS___].as<String>();
+          this->staNetworkInfo.sdns = doc[__STA_NETWORK__][___SDNS___].as<String>();
 
-          this->accessPointInfo.ssid = doc["ap"]["ssid"].as<String>();
-          this->accessPointInfo.pass = doc["ap"]["pass"].as<String>();
+          this->accessPointInfo.ssid = doc[___AP___][___SSID___].as<String>();
+          this->accessPointInfo.pass = doc[___AP___][___PASS___].as<String>();
 
-          this->apNetworkInfo.ip = doc["ap_network"]["ip"].as<String>();
-          this->apNetworkInfo.sn = doc["ap_network"]["sn"].as<String>();
-          this->apNetworkInfo.gw = doc["ap_network"]["gw"].as<String>();
-          this->apNetworkInfo.pdns = doc["ap_network"]["pdns"].as<String>();
-          this->apNetworkInfo.sdns = doc["ap_network"]["sdns"].as<String>();
+          this->apNetworkInfo.ip = doc[__AP_NETWORK__][___IP___].as<String>();
+          this->apNetworkInfo.sn = doc[__AP_NETWORK__][___SN___].as<String>();
+          this->apNetworkInfo.gw = doc[__AP_NETWORK__][___GW___].as<String>();
+          this->apNetworkInfo.pdns = doc[__AP_NETWORK__][___PDNS___].as<String>();
+          this->apNetworkInfo.sdns = doc[__AP_NETWORK__][___SDNS___].as<String>();
 
 
           /* #region Debug */
@@ -104,7 +105,7 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
           
           /* #endregion */
 
-          JsonObject wifiList = doc["wifilist"].as<JsonObject>();
+          JsonObject wifiList = doc[___WIFILIST___].as<JsonObject>();
 
           for (JsonPair p : wifiList)
           {
@@ -118,8 +119,8 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
 
                t_wifiInfo w;
 
-               w.ssid = rowData["ssid"].as<String>();
-               w.pass = rowData["password"].as<String>();
+               w.ssid = rowData[___SSID___].as<String>();
+               w.pass = rowData[___PASSWORD___].as<String>();
                //Initialize the rssi to the lowest dbm value
                w.rssi = -127;
 
@@ -146,29 +147,27 @@ void HACWifiManagerParameters::toJson(char * jsonConfig, uint16_t size)
 {
 
      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
-     doc["mode"] = this->_mode;
-     doc["enable_multi_wifi"] = this->_multiWifiEnable;
-     doc["enable_dhcp_network_sta"] = this->_dhcpStaNetworkEnable;
-     doc["enable_dhcp_network_ap"] = this->_dhcpApNetworkEnable;
-     doc["host_name"] = this->_hostName;
-     doc["total_wifi_list"] = this->wifiInfo.size();
-     doc["sta_network"]["ip"] = this->staNetworkInfo.ip;
-     doc["sta_network"]["sn"] = this->staNetworkInfo.sn;
-     doc["sta_network"]["gw"] = this->staNetworkInfo.gw;
-     doc["sta_network"]["pdns"] = this->staNetworkInfo.pdns;
-     doc["sta_network"]["sdns"] = this->staNetworkInfo.sdns;
-     doc["ap_network"]["ip"] = this->apNetworkInfo.ip;
-     doc["ap_network"]["sn"] = this->apNetworkInfo.sn;
-     doc["ap_network"]["gw"] = this->apNetworkInfo.gw;
-     doc["ap"]["ssid"] = this->accessPointInfo.ssid;
-     doc["ap"]["pass"] = this->accessPointInfo.pass;
-
-     
+     doc[__MODE__] = this->_mode;
+     doc[__ENABLE_MULTI_WIFI__] = this->_multiWifiEnable;
+     doc[__ENABLE_DHCP_NETWORK_STA__] = this->_dhcpStaNetworkEnable;
+     doc[__ENABLE_DHCP_NETWORK_AP__] = this->_dhcpApNetworkEnable;
+     doc[__HOST_NAME__] = this->_hostName;
+     doc[__TOTAL_WIFI_LIST__] = this->wifiInfo.size();
+     doc[__STA_NETWORK__][___IP___] = this->staNetworkInfo.ip;
+     doc[__STA_NETWORK__][___SN___] = this->staNetworkInfo.sn;
+     doc[__STA_NETWORK__][___GW___] = this->staNetworkInfo.gw;
+     doc[__STA_NETWORK__][___PDNS___] = this->staNetworkInfo.pdns;
+     doc[__STA_NETWORK__][___SDNS___] = this->staNetworkInfo.sdns;
+     doc[__AP_NETWORK__][___IP___] = this->apNetworkInfo.ip;
+     doc[__AP_NETWORK__][___SN___] = this->apNetworkInfo.sn;
+     doc[__AP_NETWORK__][___GW___] = this->apNetworkInfo.gw;
+     doc[___AP___][___SSID___] = this->accessPointInfo.ssid;
+     doc[___AP___][___PASS___] = this->accessPointInfo.pass;
 
      for (uint8_t i = 0; i < this->wifiInfo.size(); i++)
      {
-          doc["wifilist"][String(i)]["ssid"] = this->wifiInfo[i].ssid;
-          doc["wifilist"][String(i)]["password"] = this->wifiInfo[i].pass;
+          doc[___WIFILIST___][String(i)][___SSID___] = this->wifiInfo[i].ssid;
+          doc[___WIFILIST___][String(i)][___PASSWORD___] = this->wifiInfo[i].pass;
      }
 
      doc.shrinkToFit();
@@ -276,6 +275,7 @@ String HACWifiManagerParameters::getHostName()
 void HACWifiManagerParameters::clearWifiList()
 {
      this->wifiInfo.clear();
+     this->wifiInfo = std::vector<t_wifiInfo>();
 }
 
 /**
@@ -361,11 +361,13 @@ bool HACWifiManagerParameters::removeWifiList(const char *ssid)
           }
           //Clear the wifiInfo
           this->wifiInfo.clear();
+          this->wifiInfo = std::vector<t_wifiInfo>();
           //Copy tmp to wifiInfo
           for (auto entry : tmp)
                this->wifiInfo.push_back(entry);
           //Clear temporary vector array
           tmp.clear();
+          tmp = std::vector<t_wifiInfo>();
      })) return false;
 
      return true;

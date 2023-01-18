@@ -53,6 +53,13 @@ const char HAC_WFM_VERBOSE_MSG14[] PROGMEM = "SSID = %s";
 const char HAC_WFM_VERBOSE_MSG15[] PROGMEM = "password = %s";
 const char HAC_WFM_VERBOSE_MSG16[] PROGMEM = "Total wifi = %d";
 const char HAC_WFM_VERBOSE_MSG17[] PROGMEM = "New ssid = %s Comparing to = %s";
+const char HAC_WFM_VERBOSE_MSG18[] PROGMEM = "Start writing to file %s..";
+const char HAC_WFM_VERBOSE_MSG19[] PROGMEM = "Wifi Manager Configuration : %s ";
+const char HAC_WFM_VERBOSE_MSG20[] PROGMEM = "Failed to open file %s for writing..";
+const char HAC_WFM_VERBOSE_MSG21[] PROGMEM = "Failed to save file %s!!";
+const char HAC_WFM_VERBOSE_MSG22[] PROGMEM = "Successfully save the file %s!!";
+const char HAC_WFM_VERBOSE_MSG23[] PROGMEM = "Failed to open file %s for reading..";
+const char HAC_WFM_VERBOSE_MSG24[] PROGMEM = "Start reading from file %s..";
 
 const char HAC_WFM_VERBOSE_MSG100[] PROGMEM = "Wifi sleep style = %d";
 const char HAC_WFM_VERBOSE_MSG101[] PROGMEM = "Wifi physical mode = %d";

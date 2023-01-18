@@ -30,19 +30,6 @@
 
 #if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
 
-#define DEBUG_HAC_WIFI_PARAM Serial // Custom serial debug
-#define DEBUG_MSG_HAC_WIFI_PARAM(msg, ...)               \
-    {                                                    \
-        DEBUG_HAC_WIFI_PARAM.printf(msg, ##__VA_ARGS__); \
-    } // Custom serial debug for Serial.printf
-#define DEBUG_MSG_HAC_WIFI_PARAM_LN(msg)   \
-    {                                      \
-        DEBUG_HAC_WIFI_PARAM.println(msg); \
-    } // Custom serial debug for Serial.println
-#define DEBUG_MSG_HAC_WIFI_PARAM_SERIAL_INIT() \
-    {                                          \
-        DEBUG_HAC_WIFI_PARAM.begin(115200);    \
-    } // Serial initialization baud rate
 #define DEBUG_CALLBACK_HAC_PARAM(msg)          \
     {                                          \
         HACWifiManagerParameters::_debug(msg); \
@@ -59,9 +46,6 @@
     }
 #else
 
-#define DEBUG_MSG_HAC_WIFI_PARAM(msg, ...)
-#define DEBUG_MSG_HAC_WIFI_PARAM_LN(msg)
-#define DEBUG_MSG_HAC_WIFI_PARAM_SERIAL_INIT()
 #define DEBUG_CALLBACK_HAC_PARAM(msg)
 #define DEBUG_CALLBACK_HAC_PARAM2(msg, ...)
 
@@ -80,6 +64,24 @@
 /* #endregion */
 
 /* #region GLOBAL_DECLARATION */
+#define __MODE__ "mode"
+#define __ENABLE_MULTI_WIFI__ "enable_multi_wifi"
+#define __ENABLE_DHCP_NETWORK_STA__ "enable_dhcp_network_sta"
+#define __ENABLE_DHCP_NETWORK_AP__ "enable_dhcp_network_ap"
+#define __HOST_NAME__ "host_name"
+#define __STA_NETWORK__ "sta_network"
+#define __AP_NETWORK__ "ap_network"
+#define __TOTAL_WIFI_LIST__ "total_wifi_list"
+#define ___IP___ "ip"
+#define ___SN___ "sn"
+#define ___GW___ "gw"
+#define ___PDNS___ "pdns"
+#define ___SDNS___ "sdns"
+#define ___AP___ "ap"
+#define ___SSID___ "ssid"
+#define ___PASS___ "pass"
+#define ___PASSWORD___ "password"
+#define ___WIFILIST___ "wifilist"
 // typedef std::function<void()> tListGenCbFnHaCSub;                      // Standard void function with non-return value
 typedef std::function<void(const char *)> tListGenCbFnHaC1StrParamSub; // Standard void function with non-return value
 typedef std::function<void(uint8_t)> tListGenCbFnHaC1IntParamSub;      // Standard void function with non-return value
