@@ -32,10 +32,20 @@
      * Constructor.
      */
 HaCWifiManager::HaCWifiManager() {
+     
+     this->_wifiParam = new HACWifiManagerParameters();
      //wifi parameter onDebug callback
-     this->_wifiParam.onDebug([&](const char *msg){
+     this->_wifiParam->onDebug([&](const char *msg){
           DEBUG_CALLBACK_HAC(msg);     
      });
+     
+}
+
+/**
+     * Constructor.
+     */
+HaCWifiManager::~HaCWifiManager() {
+     if(this->_wifiParam) delete this->_wifiParam;
 }
 
 /**
@@ -45,6 +55,8 @@ HaCWifiManager::HaCWifiManager() {
      */
 void HaCWifiManager::setup(const char *wifiJsonStr)
 {
+     if(!this->_wifiParam)return;
+
      //Setup the wifi parameters from Json format string
      DEBUG_CALLBACK_HAC(F("Setting up wifi parameters from json data."));
      //Process the json data
@@ -56,11 +68,12 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
      {
           DEBUG_CALLBACK_HAC(F("Data is a valid json."));
           //Set wifiParam hostname
-          this->_generateWifiMacStrLower();
-          this->_wifiParam.setHostName(String(String(DEFAULT_HOST_NAME) + String(this->_wifiMacAddress)).c_str());
+          //this->_generateWifiMacStrLower();
+         
+          this->_wifiParam->setHostName(DEFAULT_HOST_NAME);
           //Json data is a valid json format hence it will be safe to be process by the wifi parameter class
           
-          this->_wifiParam.fromJson(wifiJsonStr);
+          this->_wifiParam->fromJson(wifiJsonStr);
 
           //Setting up wifi Core
           this->setup();
@@ -93,7 +106,7 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
      */
 void HaCWifiManager::setup(
     const char *defaultSSID,
-    const char *defaultPass,
+    const char *defaultPass,    
     const char *hostName,
     WifiMode mode,
     bool enableMultiWifi,
@@ -115,8 +128,7 @@ void HaCWifiManager::setup(
      //Set wifiParam hostname
      if(String(hostName) == "")
      {
-          this->_generateWifiMacStrLower();
-          this->setHostName(String(String(DEFAULT_HOST_NAME) + String(this->_wifiMacAddress) ).c_str());
+          this->setHostName(DEFAULT_HOST_NAME);
      }
      else
           this->setHostName(hostName);
@@ -134,12 +146,12 @@ void HaCWifiManager::setup(
      this->setAPInfo(apSsid, apPass);
      //Set first object of Wifi information list
      std::vector<t_wifiInfo> tmp;
-     for(auto entry: this->_wifiParam.wifiInfo)
+     for(auto entry: this->_wifiParam->wifiInfo)
           tmp.push_back(entry);
-     this->_wifiParam.clearWifiList();
+     this->_wifiParam->clearWifiList();
      this->addWifiList(defaultSSID, defaultPass);
      for(auto entry: tmp)
-          this->_wifiParam.wifiInfo.push_back(entry);
+          this->_wifiParam->wifiInfo.push_back(entry);
      tmp.clear();
 
      //Setup wifimanager
@@ -153,20 +165,23 @@ void HaCWifiManager::setup(
 
 void HaCWifiManager::setup()
 {
+     if(!this->_wifiParam)return;
+
      //Check mode validity
-     if (this->_wifiParam.getMode() < STA_ONLY || this->_wifiParam.getMode() > BOTH_STA_AP)
+     if (this->_wifiParam->getMode() < STA_ONLY || this->_wifiParam->getMode() > BOTH_STA_AP)
      {
           this->_printError(1);
           DEBUG_CALLBACK_HAC(F("Invalid wifi mode!"));
           return;
      }
      //Check and ssid or password pair
-     if (this->_wifiParam.getWifiListCount() == 0)
+     if (this->_wifiParam->getWifiListCount() == 0)
      {
           this->_printError(2);
           DEBUG_CALLBACK_HAC(F("There is no ssid configured!"));
           return;
      }
+
 
      //Initialize watchdog timer
      this->_staWatchdogTimer = Tick(30000);
@@ -178,13 +193,16 @@ void HaCWifiManager::setup()
      this->_initWifiManager();
 }
 
+
 /**
      * Setting wifi mode.     
      * @param mode WifiMode wifi mode such as STA_ONLY, AP_ONLY & BOTH.
      */
 void HaCWifiManager::setMode(WifiMode mode)
 {
-     this->_wifiParam.setMode(mode);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->setMode(mode);
 }
 
 /**
@@ -193,45 +211,115 @@ void HaCWifiManager::setMode(WifiMode mode)
      */
 WifiMode HaCWifiManager::getMode()
 {
-     return (WifiMode)this->_wifiParam.getMode();
+     if(!this->_wifiParam)return(WifiMode)0;
+
+     return (WifiMode)this->_wifiParam->getMode();
 }
 
-/**
-     * Getting station ip in string.  
-     * @return IP in string format.        
-     */
-String HaCWifiManager::getStaIP()
-{
-     return WiFi.localIP().toString();
-}
 
 /**
-     * Getting station ip in string.  
+     * Getting station ip .  
      * @param ip IP in char pointer
      */
 void HaCWifiManager::getStaIP(char *ip)
-{
-     //Serial.printf("IP addess %d\n",(int)ip);
-     const char *ptr = this->getAPIP().c_str();
-     //Serial.println(WiFi.localIP().toString());
-     char c;
-     uint8_t i = 0;
-     while((c = *(ptr++)))
-          ip[i++] = c;
-     
-     //Serial.printf("IP addess %d \n",(int)ip);
-     //Serial.printf("IP addess %s \n",&ip[0]);
+{     
+     strcpy(ip, &(WiFi.localIP().toString())[0]);
 }
 
 /**
-     * Getting Access Point ip in string.  
-     * @return IP in string format.        
+     * Getting station subnet .  
+     * @param sn Subnet pointer address
      */
-String HaCWifiManager::getAPIP()
-{
-     return WiFi.softAPIP().toString();
+void HaCWifiManager::getStaSubnetMask(char *sn)
+{     
+     strcpy(sn, &(WiFi.subnetMask().toString())[0]);
 }
 
+/**
+     * Getting station gateway .  
+     * @param gw Gateway pointer address
+     */
+void HaCWifiManager::getGateway(char *gw)
+{     
+     strcpy(gw, &(WiFi.gatewayIP().toString())[0]);
+}
+
+/**
+     * Getting Access Point IP.  
+     * @param ip Access point IP
+     */
+void HaCWifiManager::getAPIP(char *ip)
+{  
+     struct ip_info info;   
+     wifi_get_ip_info(SOFTAP_IF, &info);     
+     strcpy(ip, &(IPAddress(info.ip.addr).toString())[0]);
+}
+
+/**
+     * Getting station gateway .  
+     * @param sn Access point subnet pointer
+     */
+void HaCWifiManager::getAPSubnet(char *sn)
+{  
+     struct ip_info info;   
+     wifi_get_ip_info(SOFTAP_IF, &info);     
+     strcpy(sn, &(IPAddress(info.netmask.addr).toString())[0]);
+}
+
+/**
+     * Getting station gateway .  
+     * @param gw Access point gateway pointer
+     */
+void HaCWifiManager::getAPGateway(char *gw)
+{  
+     struct ip_info info;   
+     wifi_get_ip_info(SOFTAP_IF, &info);     
+     strcpy(gw, &(IPAddress(info.gw.addr).toString())[0]);
+}
+
+/**
+     * Getting network dns1.  
+     * @param dns1 DNS server1 
+     */
+void HaCWifiManager::getDNS1(char *dns1)
+{  
+     struct ip_info info;
+     dns_getserver(0)->addr;
+     info.ip.addr = dns_getserver(1)->addr;
+
+     strcpy(dns1, &(IPAddress(info.ip.addr).toString())[0]);
+}
+
+/**
+     * Getting network dns2.  
+     * @param dns2 DNS server2 
+     */
+void HaCWifiManager::getDNS2(char *dns1)
+{  
+     struct ip_info info;
+     dns_getserver(1)->addr;
+     info.ip.addr = dns_getserver(1)->addr;
+
+     strcpy(dns1, &(IPAddress(info.ip.addr).toString())[0]);
+}
+
+/**
+     * Getting station ssid.  
+     * @param ssid Station ssid pointer address
+     */
+void HaCWifiManager::getSTAWifiSSID(char *ssid)
+{  
+     strcpy(ssid, &(WiFi.SSID())[0]);
+}
+
+/**
+     * Getting Access Point ssid.   
+     * @param apPassword Access point ssid pointer address
+     */
+void HaCWifiManager::getAPWifiSSID(char *ssid)
+{  
+     strcpy(ssid, &(WiFi.softAPSSID())[0]);
+}
 
 /**
      * Setting multi wifi enable flag.     
@@ -239,7 +327,9 @@ String HaCWifiManager::getAPIP()
      */
 void HaCWifiManager::setEnableMultiWifi(bool enable)
 {
-     this->_wifiParam.setEnableMultiWifi(enable);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->setEnableMultiWifi(enable);
 }
 
 /**
@@ -248,7 +338,9 @@ void HaCWifiManager::setEnableMultiWifi(bool enable)
      */
 bool HaCWifiManager::getEnableMultiWifi()
 {
-     return this->_wifiParam.getEnableMultiWifi();
+     if(!this->_wifiParam)return false;
+
+     return this->_wifiParam->getEnableMultiWifi();
 }
 
 /**
@@ -258,8 +350,11 @@ bool HaCWifiManager::getEnableMultiWifi()
      */
 void HaCWifiManager::setEnableDHCPNetwork(bool enableSta, bool enableAp)
 {
-     this->_wifiParam.setEnableDHCPNetwork(enableSta, enableAp);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->setEnableDHCPNetwork(enableSta, enableAp);
 }
+
 
 /**
      * Getting DHCP Enable flag.   
@@ -268,7 +363,8 @@ void HaCWifiManager::setEnableDHCPNetwork(bool enableSta, bool enableAp)
      */
 bool HaCWifiManager::getEnableDHCPNetwork(NetworkType netWorkType)
 {
-     return this->_wifiParam.getEnableDHCPNetwork(netWorkType);
+     if(!this->_wifiParam)return false;
+     return this->_wifiParam->getEnableDHCPNetwork(netWorkType);
 }
 
 /**
@@ -294,14 +390,16 @@ void HaCWifiManager::setNetWorkInformation(
                     const char *apGw
     )
 {
-     this->_wifiParam.staNetworkInfo.ip = String(ip);
-     this->_wifiParam.staNetworkInfo.gw = String(gw);
-     this->_wifiParam.staNetworkInfo.sn = String(sn);
-     this->_wifiParam.staNetworkInfo.pdns = String(pdns);
-     this->_wifiParam.staNetworkInfo.sdns = String(sdns);
-     this->_wifiParam.apNetworkInfo.ip = String(apIp);
-     this->_wifiParam.apNetworkInfo.sn = String(apSn);
-     this->_wifiParam.apNetworkInfo.gw = String(apGw);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->staNetworkInfo.ip = String(ip);
+     this->_wifiParam->staNetworkInfo.gw = String(gw);
+     this->_wifiParam->staNetworkInfo.sn = String(sn);
+     this->_wifiParam->staNetworkInfo.pdns = String(pdns);
+     this->_wifiParam->staNetworkInfo.sdns = String(sdns);
+     this->_wifiParam->apNetworkInfo.ip = String(apIp);
+     this->_wifiParam->apNetworkInfo.sn = String(apSn);
+     this->_wifiParam->apNetworkInfo.gw = String(apGw);
 
 }
 
@@ -315,8 +413,10 @@ void HaCWifiManager::setAPInfo(
      const char *ssid, 
      const char *pass)
 {
-     this->_wifiParam.accessPointInfo.ssid = String(ssid);
-     this->_wifiParam.accessPointInfo.pass = String(pass);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->accessPointInfo.ssid = String(ssid);
+     this->_wifiParam->accessPointInfo.pass = String(pass);
 
 }
 
@@ -326,7 +426,9 @@ void HaCWifiManager::setAPInfo(
      */
 void HaCWifiManager::setHostName(const char *hostName)
 {
-     this->_wifiParam.setHostName(hostName);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->setHostName(hostName);
 }
 
 /**
@@ -335,7 +437,9 @@ void HaCWifiManager::setHostName(const char *hostName)
      */
 String HaCWifiManager::getHostName()
 {
-     return this->_wifiParam.getHostName();
+     if(!this->_wifiParam)return "";
+
+     return this->_wifiParam->getHostName();
 }
 
 /**
@@ -343,7 +447,9 @@ String HaCWifiManager::getHostName()
      */
 void HaCWifiManager::getWifiConfigJson(char *jsonConfig, uint16_t size)
 {
-     this->_wifiParam.toJson(jsonConfig, size);
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->toJson(jsonConfig, size);
 }
 
 /**
@@ -352,8 +458,10 @@ void HaCWifiManager::getWifiConfigJson(char *jsonConfig, uint16_t size)
      * @param pass Wifi Password          
      */
 void HaCWifiManager::addWifiList(const char *ssid, const char *pass)
-{     
-     this->_wifiParam.addWifiList(ssid, pass);
+{  
+     if(!this->_wifiParam)return;
+
+     this->_wifiParam->addWifiList(ssid, pass);
 }
 
 /**
@@ -365,7 +473,9 @@ void HaCWifiManager::addWifiList(const char *ssid, const char *pass)
 bool HaCWifiManager::editWifiList(const char *oldSsid, const char *oldPass,
                                             const char *newSsid, const char *newPass)
 {
-     return this->_wifiParam.editWifiList(oldSsid, oldPass, newSsid, newPass);
+     if(!this->_wifiParam)return false;
+
+     return this->_wifiParam->editWifiList(oldSsid, oldPass, newSsid, newPass);
 }
 
 /**
@@ -374,7 +484,9 @@ bool HaCWifiManager::editWifiList(const char *oldSsid, const char *oldPass,
      */
 bool HaCWifiManager::removeWifiList(const char *ssid)
 {
-     return this->_wifiParam.removeWifiList(ssid);
+     if(!this->_wifiParam)return false;
+
+     return this->_wifiParam->removeWifiList(ssid);
 }
 
 /**
@@ -479,24 +591,34 @@ void HaCWifiManager::loop()
                {
                     DEBUG_CALLBACK_HAC(F("MDNS failed to start."));
                     this->_printError(23);
-               }
-               
+               }              
+          }
+          //Saving to file
+          this->_save();
+
+          //Destroying parameters
+          if(this->_wifiParam)
+          {
+               DEBUG_CALLBACK_HAC(F("Destroying wifi parameters.."));
+               delete this->_wifiParam;
           }
 
      }
      //Wifi station onDisconnect event
      if (WiFi.status() != WL_CONNECTED && this->_onReadyStateSTAFlagOnce)
      {
+          //this->_initParam();
+
           if (this->_onSTADisconnectFn)
                this->_onSTADisconnectFn(WiFi.SSID().c_str());
           this->_onReadyStateSTAFlagOnce = false;
 
           //Set the rssi for the current ssid to the lowest dbM value
           //in order to put it lowest on the new scanning
-          this->_wifiParam.wifiInfo[0].rssi = -127;
+          this->_wifiParam->wifiInfo[0].rssi = -127;
 
           //if multiwifi is enabled then reinitialized the wifi multimode setup
-          if (this->_wifiParam.getEnableMultiWifi())
+          if (this->_wifiParam->getEnableMultiWifi())
                this->_setupSTAMultiWifi();
 
           
@@ -514,6 +636,13 @@ void HaCWifiManager::loop()
      //Access point onReady event
      if (this->_apFlagStarted && !this->_onReadyStateAPFlagOnce)
      {
+          //Destroying parameters
+          if(this->_wifiParam && this->_wifiParam->getMode() == AP_ONLY)
+          {
+               DEBUG_CALLBACK_HAC(F("Destroying wifi parameters.."));
+               delete this->_wifiParam;
+          }
+
           this->_onReadyStateAPFlagOnce = true;          
           if (this->_onAPReadyFn)
                this->_onAPReadyFn(WiFi.softAPSSID().c_str());
@@ -521,6 +650,7 @@ void HaCWifiManager::loop()
      //Access point onDisconnect event
      if (!this->_apFlagStarted && this->_onReadyStateAPFlagOnce)
      {
+          //this->_initParam();
           this->_onReadyStateAPFlagOnce = false;          
           if (this->_onAPDisconnectFn)
                this->_onAPDisconnectFn(WiFi.softAPSSID().c_str());
@@ -660,6 +790,8 @@ void HaCWifiManager::_debug(const char *data)
           this->_onDebugFn(String(String(HAC_DEBUG_PREFIX) + " " + String(data)).c_str());
 }
 
+
+
 /**
      * Print error function.     
      * @param data uint8_t .
@@ -676,7 +808,9 @@ void HaCWifiManager::_printError(uint8_t errorCode)
      */
 void HaCWifiManager::_initWifiManager()
 {
-     switch (this->_wifiParam.getMode())
+     if(!this->_wifiParam)return;
+
+     switch (this->_wifiParam->getMode())
      {
      case STA_ONLY:
           WiFi.softAPdisconnect(true);
@@ -706,9 +840,12 @@ void HaCWifiManager::_initWifiManager()
      */
 void HaCWifiManager::_initStation(bool isStartUp)
 {
+     if(!this->_wifiParam)this->_initParam();
+     if(!this->_wifiParam) return;
+
      DEBUG_CALLBACK_HAC(F("Initializing station.."));
      //Check if it is multi or single wifi
-     if (this->_wifiParam.getEnableMultiWifi())
+     if (this->_wifiParam->getEnableMultiWifi())
           this->_setupSTAMultiWifi(isStartUp);
      else
           this->_setupSTASingleWifi(isStartUp);
@@ -720,7 +857,7 @@ void HaCWifiManager::_initStation(bool isStartUp)
 void HaCWifiManager::_setupSTAMultiWifi(bool isStartup)
 {
      //If there is only one ssid on the list then set it up as a single wifi
-     if (this->_wifiParam.getWifiListCount() == 1)
+     if (this->_wifiParam->getWifiListCount() == 1)
      {
           this->_setupSTASingleWifi(isStartup);
           return;
@@ -785,6 +922,8 @@ void HaCWifiManager::_setupSTAMultiWifi(bool isStartup)
      */
 bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
 {
+     if(!this->_wifiParam)return false;
+
      String ssid;
      int32_t rssi;
      uint8_t encType;
@@ -800,16 +939,16 @@ bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
           WiFi.getNetworkInfo(i, ssid, encType, rssi, bssid, channel, hidden);
           // Check if the WiFi network contains an entry in Wifiinfo list
           uint8_t j = 0;
-          for (auto entry : this->_wifiParam.wifiInfo)
+          for (auto entry : this->_wifiParam->wifiInfo)
           {
                // Check SSID
                if (ssid == entry.ssid)
                {
                     // Known network
                     atleastOneSsidListFoundFlag = true;
-                    this->_wifiParam.wifiInfo[j].rssi = WiFi.RSSI(i);
+                    this->_wifiParam->wifiInfo[j].rssi = WiFi.RSSI(i);
                     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG105, ssid.c_str());
-                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG106, this->_wifiParam.wifiInfo[j].rssi);
+                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG106, this->_wifiParam->wifiInfo[j].rssi);
                }
                j++;
           }
@@ -824,23 +963,25 @@ bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
      */
 void HaCWifiManager::_sortWifiRssi()
 {
+     if(!this->_wifiParam)return;
+
      DEBUG_CALLBACK_HAC(F("Sorting Wifi AP based on Rssi"));
-     for (uint8_t i = 0; i < this->_wifiParam.getWifiListCount(); i++)
+     for (uint8_t i = 0; i < this->_wifiParam->getWifiListCount(); i++)
      {
-          for (uint8_t j = 0; j < this->_wifiParam.getWifiListCount(); j++)
+          for (uint8_t j = 0; j < this->_wifiParam->getWifiListCount(); j++)
           {
-               if (this->_wifiParam.wifiInfo[i].rssi > this->_wifiParam.wifiInfo[j].rssi)
+               if (this->_wifiParam->wifiInfo[i].rssi > this->_wifiParam->wifiInfo[j].rssi)
                {
                     t_wifiInfo tmp;
 
-                    tmp = this->_wifiParam.wifiInfo[i];
-                    this->_wifiParam.wifiInfo[i] = this->_wifiParam.wifiInfo[j];
-                    this->_wifiParam.wifiInfo[j] = tmp;
+               tmp = this->_wifiParam->wifiInfo[i];
+                    this->_wifiParam->wifiInfo[i] = this->_wifiParam->wifiInfo[j];
+                    this->_wifiParam->wifiInfo[j] = tmp;
                }
           }
      }
 
-     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG107, this->_wifiParam.wifiInfo[0].ssid.c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG107, this->_wifiParam->wifiInfo[0].ssid.c_str());
 }
 
 /**
@@ -848,19 +989,23 @@ void HaCWifiManager::_sortWifiRssi()
      */
 void HaCWifiManager::_setupSTASingleWifi(bool isStartUp)
 {
+     if(!this->_wifiParam)this->_initParam();
+     if(!this->_wifiParam)return;
+
      DEBUG_CALLBACK_HAC(F("Setting up single STA wifi.."));
      if (isStartUp)
      {
           delay(1000);
-          this->_startStation(this->_wifiParam.wifiInfo[0].ssid.c_str(),
-                              this->_wifiParam.wifiInfo[0].pass.c_str());
+          this->_startStation(this->_wifiParam->wifiInfo[0].ssid.c_str(),
+                              this->_wifiParam->wifiInfo[0].pass.c_str());
      }
      else //After startup, wifi setup will be done asynchronously
      {          
           this->_staStartupTimer.onTick([&]()
                                         {
-                                             this->_startStation(this->_wifiParam.wifiInfo[0].ssid.c_str(),
-                                                                 this->_wifiParam.wifiInfo[0].pass.c_str());
+                                             //if(!this->_wifiParam) this->_initParam();
+                                             this->_startStation(this->_wifiParam->wifiInfo[0].ssid.c_str(),
+                                                                 this->_wifiParam->wifiInfo[0].pass.c_str());
                                              this->_staStartupTimer.stop();
                                         });
           this->_staStartupTimer.begin();
@@ -874,8 +1019,10 @@ void HaCWifiManager::_setupSTASingleWifi(bool isStartUp)
      */
 void HaCWifiManager::_startStation(const char *ssid, const char *pass)
 {
+     if(!this->_wifiParam)return;
+
      //Check if network set as DHCP for station     
-     if (!(this->_wifiParam.getEnableDHCPNetwork(NETWORK_STATION)))
+     if (!(this->_wifiParam->getEnableDHCPNetwork(NETWORK_STATION)))
           this->_manualStaNetworkSetupSuccess = this->_setupNetworkManually(NETWORK_STATION);
 
      /* #region Debug */
@@ -903,11 +1050,13 @@ void HaCWifiManager::_startStation(const char *ssid, const char *pass)
      */
 bool HaCWifiManager::_setupNetworkManually(NetworkType netWorkType)
 {
+     if(!this->_wifiParam)return false;
+
      t_networkInfo netInfo;
      if(netWorkType == NETWORK_STATION) 
-          netInfo = this->_wifiParam.staNetworkInfo;     
+          netInfo = this->_wifiParam->staNetworkInfo;     
      if(netWorkType == NETWORK_AP) 
-          netInfo = this->_wifiParam.apNetworkInfo;     
+          netInfo = this->_wifiParam->apNetworkInfo;     
 
      DEBUG_CALLBACK_HAC(F("Setting up network manually.."));
      IPAddress ip, gw, sn, pdns, sdns;
@@ -972,22 +1121,22 @@ bool HaCWifiManager::_setupNetworkManually(NetworkType netWorkType)
      */
 void HaCWifiManager::_startAccessPoint()
 {
+     if(!this->_wifiParam)return;
 
      //Check if Access point is provided
-     if (this->_wifiParam.accessPointInfo.ssid == "null")
+     if (this->_wifiParam->accessPointInfo.ssid == "null")
      {
-          this->_generateAccessPointInformation();
-          this->_wifiParam.accessPointInfo.ssid = String(this->_defaultAccessPointID);
-          this->_wifiParam.accessPointInfo.pass = String(this->_defaultAccessPointPass);
+          this->_wifiParam->accessPointInfo.ssid = String(___DEF_SSID___);
+          this->_wifiParam->accessPointInfo.pass = String(___DEF_PASS___);
      }
 
      /* #region Debug */
-     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG114, this->_wifiParam.accessPointInfo.ssid.c_str());
-     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG115, this->_wifiParam.accessPointInfo.pass.c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG114, this->_wifiParam->accessPointInfo.ssid.c_str());
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG115, this->_wifiParam->accessPointInfo.pass.c_str());
      /* #endregion */
 
      //Raise error if ap ssid or password is empty
-     if (this->_wifiParam.accessPointInfo.ssid == "" || this->_wifiParam.accessPointInfo.pass == "")
+     if (this->_wifiParam->accessPointInfo.ssid == "" || this->_wifiParam->accessPointInfo.pass == "")
      {
           this->_printError(9);
           DEBUG_CALLBACK_HAC(F("Invalid access point parameters."));
@@ -995,16 +1144,16 @@ void HaCWifiManager::_startAccessPoint()
      }
 
      //Check DHCP enable network is set
-     if (!(this->_wifiParam.getEnableDHCPNetwork(NETWORK_AP)))
+     if (!(this->_wifiParam->getEnableDHCPNetwork(NETWORK_AP)))
           this->_manualApNetworkSetupSuccess = this->_setupNetworkManually(NETWORK_AP);
 
 
 
-     if (!WiFi.softAP(this->_wifiParam.accessPointInfo.ssid.c_str(), this->_wifiParam.accessPointInfo.pass.c_str(), 6, 0, 5))
+     if (!WiFi.softAP(this->_wifiParam->accessPointInfo.ssid.c_str(), this->_wifiParam->accessPointInfo.pass.c_str(), 6, 0, 5))
      {
           this->_printError(10);
-          DEBUG_CALLBACK_HAC(this->_wifiParam.accessPointInfo.ssid.c_str());
-          DEBUG_CALLBACK_HAC(this->_wifiParam.accessPointInfo.pass.c_str());
+          DEBUG_CALLBACK_HAC(this->_wifiParam->accessPointInfo.ssid.c_str());
+          DEBUG_CALLBACK_HAC(this->_wifiParam->accessPointInfo.pass.c_str());
           DEBUG_CALLBACK_HAC(F("Failed to setup access point."));
           return;
      }
@@ -1013,52 +1162,111 @@ void HaCWifiManager::_startAccessPoint()
 }
 
 /**
-     * Function that will generate the access point default information such as ssid and pass.     
+     * Initialize parameter.     
      */
-void HaCWifiManager::_generateAccessPointInformation()
+void HaCWifiManager::_initParam()
 {
-     DEBUG_CALLBACK_HAC(F("Generating Access point information.."));
-     //Setting memory
-     memset(this->_defaultAccessPointID, 0, sizeof(this->_defaultAccessPointID));
-     memset(this->_defaultAccessPointPass, 0, sizeof(this->_defaultAccessPointPass));
-     memset(this->_wifiMacAddress, 0, sizeof(this->_wifiMacAddress));
+     this->_wifiParam = new HACWifiManagerParameters();
 
-     if (this->_generateWifiMacStrLower())
-     {
-          sprintf(this->_defaultAccessPointID, "hac-%s", this->_wifiMacAddress);
-          sprintf(this->_defaultAccessPointPass, "%s", this->_wifiMacAddress);
-     }
-     else
-     {
-          sprintf(this->_defaultAccessPointID, "hac-%u", ESP.getChipId());
-          sprintf(this->_defaultAccessPointPass, "%u", ESP.getChipId());
-     }
+     char *data = new char[2000];
+     memset(data, '\0', 2000);
+
+     this->_read(data);
+
+     if(data[0] == '\0') 
+          DEBUG_CALLBACK_HAC(F("Invalid parameters retrieved.."));
+     
+     this->_wifiParam->fromJson(&data[0]);
+
+     delete[] data;
 }
+
 /**
-     * Function that will convert mac address into lower case format
-     * @return int value not equal to 0 when generation is successful
+     * Save parameters.     
      */
-
-int HaCWifiManager::_generateWifiMacStrLower()
+void HaCWifiManager::_save()
 {
-     char temp[128];
-     strcpy(temp, WiFi.macAddress().c_str());
-     if (!strlen(temp))
-          return 0;
-     char *pointer = strtok(temp, ":");
-     if (pointer == nullptr)
-          return 0;
+     char *data = new char[1000];
+     memset(data, '\0', 1000);
 
-     strcpy(this->_wifiMacAddress, pointer);
-     while ((pointer = strtok(nullptr, ":")) != nullptr)
+     this->_read(data);
+
+     if(data[0] == '\0') 
      {
-          strcat(this->_wifiMacAddress, pointer);
+          DEBUG_CALLBACK_HAC(F("Invalid parameters retrieved.."));
+          return;
      }
-     for (int i = 0; this->_wifiMacAddress[i]; i++)
+
+     char *wifiConfig = new char[1000];
+     memset(wifiConfig, '\0', 1000);
+     this->getWifiConfigJson(wifiConfig, 2000);
+     
+     if(strcmp(&data[0], &wifiConfig[0]) == 0 )
      {
-          this->_wifiMacAddress[i] = tolower(this->_wifiMacAddress[i]);
+          DEBUG_CALLBACK_HAC(F("Save is not required as file data is similar to current parameters.."));
+          delete[] data;
+          delete[] wifiConfig;
+          return;
+     } 
+
+     if(!LittleFS.begin()){    
+          DEBUG_CALLBACK_HAC(F("An Error has occurred while mounting LITTLEFS!"));        
+          return;
      }
-     return 1;
+
+     DEBUG_CALLBACK_HAC(F("Successfully mounted the littlefs.")); 
+
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG18, ___FILE_NAME___); 
+     File file = LittleFS.open(___FILE_NAME___, "w+");
+     if(!file){
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG20, ___FILE_NAME___);
+          return;
+     }       
+
+     if(!file.print(&wifiConfig[0]))
+     {
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG21, ___FILE_NAME___);
+          return;
+     }
+
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG22, ___FILE_NAME___);
+
+     delete[] wifiConfig;
+     delete[] data;
+
+     file.close();
+     LittleFS.end();
+
 }
 
+/**
+     * Read parameters.  
+     * @param data parameter buffer   
+     */
+void HaCWifiManager::_read(char *data)
+{
+     if(!LittleFS.begin()){    
+          DEBUG_CALLBACK_HAC(F("An Error has occurred while mounting LITTLEFS!"));        
+          return;
+     }
+
+     DEBUG_CALLBACK_HAC(F("Successfully mounted the littlefs.")); 
+
+     DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG24, ___FILE_NAME___); 
+     File file = LittleFS.open(___FILE_NAME___, "r");
+     if(!file){
+          DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG23, ___FILE_NAME___);
+          return;
+     }  
+
+     uint16_t i=0;
+     while(file.available()) data[i++] = (char)file.read();
+
+     data[i++] = '\0'; 
+          
+     file.close();
+
+     LittleFS.end();
+
+}
 /* #endregion */
