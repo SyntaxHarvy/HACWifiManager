@@ -68,7 +68,7 @@ static const char wifidata[] PROGMEM =
        "enable_dhcp_network_ap" : true,
        "host_name" : "hacwfmhost",
        "wifilist" : {
-           "0" : {"ssid": "ssid1", "password" : "password2"},            
+           "0" : {"ssid": "MyIOTNetA", "password" : "xtrp@ss143"},            
            "1" : {"ssid": "ssid2", "password" : "password2"}            
         },
         "ap" : {

@@ -60,7 +60,7 @@ void HaCWifiManager::setup(const char *wifiJsonStr)
      //Setup the wifi parameters from Json format string
      DEBUG_CALLBACK_HAC(F("Setting up wifi parameters from json data."));
      //Process the json data
-     DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 8192);
+     DynamicJsonDocument doc(__ESP_HEAPS_BLOCK_SIZE__ - 8192);
      DeserializationError error = deserializeJson(doc, wifiJsonStr);
      doc.shrinkToFit();
      
@@ -250,8 +250,9 @@ void HaCWifiManager::getGateway(char *gw)
      */
 void HaCWifiManager::getAPIP(char *ip)
 {  
-     struct ip_info info;   
-     wifi_get_ip_info(SOFTAP_IF, &info);     
+     __TCP_INFO__ info;      
+     __TCP_ADAPTER_GET_IP_INFO(__TCP_ADAPTER_INTERFACE__, &info);     
+
      strcpy(ip, &(IPAddress(info.ip.addr).toString())[0]);
 }
 
@@ -261,8 +262,9 @@ void HaCWifiManager::getAPIP(char *ip)
      */
 void HaCWifiManager::getAPSubnet(char *sn)
 {  
-     struct ip_info info;   
-     wifi_get_ip_info(SOFTAP_IF, &info);     
+     __TCP_INFO__ info;  
+     __TCP_ADAPTER_GET_IP_INFO(__TCP_ADAPTER_INTERFACE__, &info);   
+
      strcpy(sn, &(IPAddress(info.netmask.addr).toString())[0]);
 }
 
@@ -272,8 +274,9 @@ void HaCWifiManager::getAPSubnet(char *sn)
      */
 void HaCWifiManager::getAPGateway(char *gw)
 {  
-     struct ip_info info;   
-     wifi_get_ip_info(SOFTAP_IF, &info);     
+     __TCP_INFO__ info;  
+     __TCP_ADAPTER_GET_IP_INFO(__TCP_ADAPTER_INTERFACE__, &info);   
+
      strcpy(gw, &(IPAddress(info.gw.addr).toString())[0]);
 }
 
@@ -283,10 +286,15 @@ void HaCWifiManager::getAPGateway(char *gw)
      */
 void HaCWifiManager::getDNS1(char *dns1)
 {  
-     struct ip_info info;
-     dns_getserver(0)->addr;
-     info.ip.addr = dns_getserver(1)->addr;
+     __TCP_INFO__ info;
 
+     #ifdef ESP8266
+     info.ip.addr = dns_getserver(1)->addr;
+     #endif
+     #ifdef ESP32
+     info.ip.addr = dns_getserver(1)->u_addr.ip4.addr;
+     #endif
+     
      strcpy(dns1, &(IPAddress(info.ip.addr).toString())[0]);
 }
 
@@ -294,13 +302,18 @@ void HaCWifiManager::getDNS1(char *dns1)
      * Getting network dns2.  
      * @param dns2 DNS server2 
      */
-void HaCWifiManager::getDNS2(char *dns1)
+void HaCWifiManager::getDNS2(char *dns2)
 {  
-     struct ip_info info;
-     dns_getserver(1)->addr;
-     info.ip.addr = dns_getserver(1)->addr;
-
-     strcpy(dns1, &(IPAddress(info.ip.addr).toString())[0]);
+     __TCP_INFO__ info;
+     
+     #ifdef ESP8266
+     info.ip.addr = dns_getserver(2)->addr;
+     #endif
+     #ifdef ESP32
+     info.ip.addr = dns_getserver(2)->u_addr.ip4.addr;
+     #endif
+     
+     strcpy(dns2, &(IPAddress(info.ip.addr).toString())[0]);
 }
 
 /**
@@ -435,7 +448,7 @@ void HaCWifiManager::setHostName(const char *hostName)
      * Getting device host name
      * @return Device network host name
      */
-String HaCWifiManager::getHostName()
+const char * HaCWifiManager::getHostName()
 {
      if(!this->_wifiParam)return "";
 
@@ -496,7 +509,10 @@ void HaCWifiManager::shutdownSTA()
 {
      WiFi.disconnect();
      WiFi.mode(WIFI_OFF);
+
+     #ifdef ESP8266
      WiFi.forceSleepBegin();
+     #endif
 }
 
 /**
@@ -517,6 +533,7 @@ void HaCWifiManager::shutdown()
      this->shutdownAP();
 }
 
+#ifdef ESP8266
 /**
      * Setting Wifi Options.
      * Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7
@@ -559,6 +576,7 @@ void HaCWifiManager::setWifiOptions(bool persistent,
      DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG103, outputPower);
 
 }
+#endif
 
 /**
      * Loop routine of the library.
@@ -577,14 +595,16 @@ void HaCWifiManager::loop()
           //Initialize MDNS once
           if(!this->_initMdnsFlagOnce)
           {
-               String hostName = this->getHostName();
+               char hostName[30];
+               memset(hostName, '\0', 30);
+               strcpy(hostName, this->getHostName());
                //If host name is empty then set the default hostname
-               if(hostName == "") hostName = String(DEFAULT_HOST_NAME);
+               if(hostName[0] == '\0') strcpy(hostName, DEFAULT_HOST_NAME);
 
                if(MDNS.begin(hostName))
                {
                     DEBUG_CALLBACK_HAC(F("MDNS Started."));
-                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG116, hostName.c_str());
+                    DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG116, hostName);
                     this->_initMdnsFlagOnce = true;
                }
                else
@@ -631,7 +651,9 @@ void HaCWifiManager::loop()
                this->_onSTALoopFn("");
           
           //If MDNS initialized, then start MDNS loop
+          #ifdef ESP8266
           if(this->_initMdnsFlagOnce) MDNS.update();  
+          #endif
      }
      //Access point onReady event
      if (this->_apFlagStarted && !this->_onReadyStateAPFlagOnce)
@@ -821,7 +843,9 @@ void HaCWifiManager::_initWifiManager()
           WiFi.softAPdisconnect(true);
           WiFi.disconnect();
           WiFi.mode(WIFI_OFF);
+          #ifdef ESP8266
           WiFi.forceSleepBegin();
+          #endif
           this->_startAccessPoint();
           break;
      case BOTH_STA_AP:
@@ -929,14 +953,22 @@ bool HaCWifiManager::_scanWifiListRssi(uint8_t totalAP)
      uint8_t encType;
      uint8_t *bssid;
      int32_t channel;
+     #ifdef ESP8266
      bool hidden;
+     #endif
      bool atleastOneSsidListFoundFlag = false;
 
      DEBUG_CALLBACK_HAC(F("Scanning Wifi AP Rssi.."));
      for (uint8_t i = 0; i < totalAP; i++)
      {
           // Get network information
+          #ifdef ESP8266
           WiFi.getNetworkInfo(i, ssid, encType, rssi, bssid, channel, hidden);
+          #endif
+          #ifdef ESP32
+          WiFi.getNetworkInfo(i, ssid, encType, rssi, bssid, channel);
+          #endif
+
           // Check if the WiFi network contains an entry in Wifiinfo list
           uint8_t j = 0;
           for (auto entry : this->_wifiParam->wifiInfo)
@@ -1208,8 +1240,8 @@ void HaCWifiManager::_save()
           delete[] wifiConfig;
           return;
      } 
-
-     if(!LittleFS.begin()){    
+     
+     if(!__LITTLEFS__.begin()){    
           DEBUG_CALLBACK_HAC(F("An Error has occurred while mounting LITTLEFS!"));        
           return;
      }
@@ -1217,7 +1249,7 @@ void HaCWifiManager::_save()
      DEBUG_CALLBACK_HAC(F("Successfully mounted the littlefs.")); 
 
      DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG18, ___FILE_NAME___); 
-     File file = LittleFS.open(___FILE_NAME___, "w+");
+     File file = __LITTLEFS__.open(___FILE_NAME___, "w+");
      if(!file){
           DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG20, ___FILE_NAME___);
           return;
@@ -1235,7 +1267,7 @@ void HaCWifiManager::_save()
      delete[] data;
 
      file.close();
-     LittleFS.end();
+     __LITTLEFS__.end();
 
 }
 
@@ -1245,7 +1277,7 @@ void HaCWifiManager::_save()
      */
 void HaCWifiManager::_read(char *data)
 {
-     if(!LittleFS.begin()){    
+     if(!__LITTLEFS__.begin()){    
           DEBUG_CALLBACK_HAC(F("An Error has occurred while mounting LITTLEFS!"));        
           return;
      }
@@ -1253,7 +1285,7 @@ void HaCWifiManager::_read(char *data)
      DEBUG_CALLBACK_HAC(F("Successfully mounted the littlefs.")); 
 
      DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG24, ___FILE_NAME___); 
-     File file = LittleFS.open(___FILE_NAME___, "r");
+     File file = __LITTLEFS__.open(___FILE_NAME___, "r");
      if(!file){
           DEBUG_CALLBACK_HAC2(HAC_WFM_VERBOSE_MSG23, ___FILE_NAME___);
           return;
@@ -1266,7 +1298,7 @@ void HaCWifiManager::_read(char *data)
           
      file.close();
 
-     LittleFS.end();
+     __LITTLEFS__.end();
 
 }
 /* #endregion */

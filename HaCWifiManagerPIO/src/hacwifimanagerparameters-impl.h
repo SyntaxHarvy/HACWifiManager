@@ -34,7 +34,11 @@
 /**
      * HACWifiManagerParameters Constructor
      */
-HACWifiManagerParameters::HACWifiManagerParameters() {}
+HACWifiManagerParameters::HACWifiManagerParameters() 
+{
+     this->_hostName = new char[30];
+     memset(this->_hostName,'\0', 30);
+}
 
 /**
      * HACWifiManagerParameters Destructor
@@ -42,7 +46,9 @@ HACWifiManagerParameters::HACWifiManagerParameters() {}
 HACWifiManagerParameters::~HACWifiManagerParameters()
 {
      this->wifiInfo.clear();
-     this->wifiInfo = std::vector<t_wifiInfo>();  
+     this->wifiInfo = std::vector<t_wifiInfo>();
+
+     if(this->_hostName) delete[]this->_hostName;
 }
 
 /**
@@ -52,7 +58,7 @@ HACWifiManagerParameters::~HACWifiManagerParameters()
 void HACWifiManagerParameters::fromJson(const char *jsonStr)
 {
      DEBUG_CALLBACK_HAC_PARAM(F("Decoding json data."));
-     DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 8192);
+     DynamicJsonDocument doc(__ESP_HEAPS_BLOCK_SIZE__ - 8192);
      DeserializationError error = deserializeJson(doc, jsonStr);
      doc.shrinkToFit();
 
@@ -63,10 +69,11 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
           this->_dhcpStaNetworkEnable = doc[__ENABLE_DHCP_NETWORK_STA__].as<bool>();
           this->_dhcpApNetworkEnable = doc[__ENABLE_DHCP_NETWORK_AP__].as<bool>();
 
-          if(doc[__HOST_NAME__].as<String>() != HAC_WFM_STRING_NULL) 
-               this->_hostName = doc[__HOST_NAME__].as<String>();
+          if(!doc[__HOST_NAME__].isNull()) 
+               strcpy(this->_hostName, doc[__HOST_NAME__].as<const char*>());
+
           /* #region Debug */   
-          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG1, this->_hostName.c_str());       
+          DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG1, this->_hostName);       
           DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG2, this->_mode);
           DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG3, this->_multiWifiEnable);
           DEBUG_CALLBACK_HAC_PARAM2(HAC_WFM_VERBOSE_MSG4, this->_dhcpStaNetworkEnable);
@@ -146,7 +153,7 @@ void HACWifiManagerParameters::fromJson(const char *jsonStr)
 void HACWifiManagerParameters::toJson(char * jsonConfig, uint16_t size)
 {
 
-     DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
+     DynamicJsonDocument doc(__ESP_HEAPS_BLOCK_SIZE__ - 512);
      doc[__MODE__] = this->_mode;
      doc[__ENABLE_MULTI_WIFI__] = this->_multiWifiEnable;
      doc[__ENABLE_DHCP_NETWORK_STA__] = this->_dhcpStaNetworkEnable;
@@ -257,15 +264,15 @@ bool HACWifiManagerParameters::getEnableDHCPNetwork(NetworkType netWorkType)
      */
 void HACWifiManagerParameters::setHostName(const char *hostName)
 {
-     this->_hostName = String(hostName);
+     strcpy(this->_hostName, hostName);     
 }
 /**
      * Setting DHCP enable mode.     
      * @return String Device Network Host Name    
      */
-String HACWifiManagerParameters::getHostName()
+const char * HACWifiManagerParameters::getHostName()
 {
-     return this->_hostName;
+     return &this->_hostName[0];
 }
 
 
