@@ -34,6 +34,8 @@ wifi_get_ip_info(interface, ipInfo); \
 tcpip_adapter_get_ip_info(interface, ipInfo); \
 }
 #define __TCP_INFO__ tcpip_adapter_ip_info_t
+
+#define FORMAT_LITTLEFS_IF_FAILED true
 #endif
 
 #include <ArduinoJson.h>
