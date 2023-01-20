@@ -38,7 +38,7 @@ HaCWifiManager::HaCWifiManager() {
      this->_wifiParam->onDebug([&](const char *msg){
           DEBUG_CALLBACK_HAC(msg);     
      });
-     
+ 
 }
 
 /**
@@ -1223,17 +1223,11 @@ void HaCWifiManager::_save()
 
      this->_read(data);
 
-     if(data[0] == '\0') 
-     {
-          DEBUG_CALLBACK_HAC(F("Invalid parameters retrieved.."));
-          return;
-     }
-
      char *wifiConfig = new char[1000];
      memset(wifiConfig, '\0', 1000);
      this->getWifiConfigJson(wifiConfig, 2000);
      
-     if(strcmp(&data[0], &wifiConfig[0]) == 0 )
+     if(strcmp(&data[0], &wifiConfig[0]) == 0 && data[0] != '\0')
      {
           DEBUG_CALLBACK_HAC(F("Save is not required as file data is similar to current parameters.."));
           delete[] data;

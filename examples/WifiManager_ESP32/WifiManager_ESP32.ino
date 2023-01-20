@@ -53,7 +53,7 @@
  * This example code is in the public domain.
  * https://github.com/SyntaxHarvy/HACWifiManager
  */
-
+#define HAC_ENABLE_DEBUG
 #include <HaCWifiManager.h>
 
 //Instantiate wifimanager
@@ -68,8 +68,9 @@ static const char wifidata[] PROGMEM =
        "enable_dhcp_network_ap" : true,
        "host_name" : "hacwfmhost",
        "wifilist" : {
-           "0" : {"ssid": "MyIOTNetA", "password" : "xtrp@ss143"},            
-           "1" : {"ssid": "ssid2", "password" : "password2"}            
+           "0" : {"ssid": "ssid1", "password" : "password1"},            
+           "1" : {"ssid": "ssi2", "password" : "password2"},
+           "2" : {"ssid": "ssid3", "password" : "password3"}              
         },
         "ap" : {
           "ssid" : "mydefaultAP",
@@ -164,7 +165,7 @@ void onSTAReadyCB(const char *msg){
   memset(ip, '\0', 30);
   gHaCWifiManager.getStaIP(ip);
   Serial.printf("\n Station ready. Msg => %s \n", msg);
-  Serial.printf("\n Station IP => => %s \n", ip);
+  Serial.printf("\n Station IP => %s \n", ip);
 }
 void onSTADisconnectCB(const char *msg){
   //TO DO: Add here on station disconnect handle 
@@ -178,9 +179,9 @@ void onAPReadyCB(const char *msg){
   //TO DO: Add here all AP ready handle
   char ip[30];
   memset(ip, '\0', 30);
-  gHaCWifiManager.getStaIP(ip);
+  gHaCWifiManager.getAPIP(ip);
   Serial.printf("\n Station ready. Msg => %s \n", msg);
-  Serial.printf("\n Station IP => => %s \n", ip);
+  Serial.printf("\n Station IP => %s \n", ip);
 }
 void onAPDisconnectCB(const char *msg){
   //TO DO: Add here on AP disconnect handle 

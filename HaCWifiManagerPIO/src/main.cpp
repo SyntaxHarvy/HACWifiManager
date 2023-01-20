@@ -68,7 +68,7 @@ static const char wifidata[] PROGMEM =
        "enable_dhcp_network_ap" : true,
        "host_name" : "hacwfmhost",
        "wifilist" : {
-           "0" : {"ssid": "ssid1", "password" : "password2"},            
+           "0" : {"ssid": "ssid1", "password" : "password1"},            
            "1" : {"ssid": "ssid2", "password" : "password2"}            
         },
         "ap" : {
@@ -178,9 +178,9 @@ void onAPReadyCB(const char *msg){
   //TO DO: Add here all AP ready handle
   char ip[30];
   memset(ip, '\0', 30);
-  gHaCWifiManager.getStaIP(ip);
-  Serial.printf("\n Station ready. Msg => %s \n", msg);
-  Serial.printf("\n Station IP => => %s \n", ip);
+  gHaCWifiManager.getAPIP(ip);
+  Serial.printf("\n AP ready. Msg => %s \n", msg);
+  Serial.printf("\n AP IP => => %s \n", ip);
 }
 void onAPDisconnectCB(const char *msg){
   //TO DO: Add here on AP disconnect handle 

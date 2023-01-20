@@ -30,8 +30,13 @@
 /* #region Debug */
 #define HAC_DEBUG_PREFIX "[HACWIFIMANAGER]"
 #define DEFAULT_HOST_NAME "HACWIFIMNGRHOST"
-#define WIFI_SCAN_TIMEOUT 1000   
+#define WIFI_SCAN_TIMEOUT 1000  
+#ifdef ESP8266 
 #define MAX_WIFI_SCAN_ATTEMPT 3
+#endif
+#ifdef ESP32 
+#define MAX_WIFI_SCAN_ATTEMPT 5
+#endif
 
 #if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
 
