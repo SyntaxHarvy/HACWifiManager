@@ -1,5 +1,5 @@
 # HACWifiManager
-Event driven wifimanager for esp8266 arduino application.
+Event driven wifimanager for esp8266/esp32 arduino application.
 
 The **HACWifiManager** allows you to create easily a callbacks for the following events:
 - **onDebug**, 
