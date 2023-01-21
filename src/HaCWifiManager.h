@@ -30,8 +30,13 @@
 /* #region Debug */
 #define HAC_DEBUG_PREFIX "[HACWIFIMANAGER]"
 #define DEFAULT_HOST_NAME "HACWIFIMNGRHOST"
-#define WIFI_SCAN_TIMEOUT 1000   
+#define WIFI_SCAN_TIMEOUT 1000  
+#ifdef ESP8266 
 #define MAX_WIFI_SCAN_ATTEMPT 3
+#endif
+#ifdef ESP32 
+#define MAX_WIFI_SCAN_ATTEMPT 5
+#endif
 
 #if defined(DEBUG_ESP_PORT) || defined(HAC_ENABLE_DEBUG)
 
@@ -83,25 +88,9 @@
 /* #endregion */
 
 /* #region EXTERNAL_DEPENDENCY */
-#include <Arduino.h>
+#include "global.h"
 
-#if defined(ESP8266)
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-extern "C" {
-#include "lwip/err.h"
-#include "lwip/dns.h"
-#include "lwip/dhcp.h"
-}
-#endif
 
-#if defined(ESP32)
-#include <WiFi.h>
-#include <ESPmDNS.h>
-#endif
-
-#include <ArduinoJson.h>
-#include <LittleFS.h>
 /* #endregion */
 
 /* #region GLOBAL_DECLARATION */
@@ -117,6 +106,8 @@ enum WifiMode
     AP_ONLY = 2,     // Access point mode only
     BOTH_STA_AP = 3, // Both station and access point mode
 };
+
+
 
 /* #endregion */
 
@@ -175,7 +166,7 @@ public:
                     );
 
     void setHostName(const char *hostName);
-    String getHostName();
+    const char * getHostName();
     void getWifiConfigJson(char *jsonConfig, uint16_t size);
 
     void addWifiList(const char *ssid, const char *pass);
@@ -201,12 +192,15 @@ public:
     void getAPWifiSSID(char *ssid);
     
     /* Note: Added as per issue #7, https://github.com/SyntaxHarvy/HACWifiManager/issues/7 */
+    #if defined(ESP8266)
     void setWifiOptions(
         bool persistent = false,
         WiFiSleepType wifiSleepStyle = WIFI_NONE_SLEEP,
         float outputPower = 16.5,
         WiFiPhyMode wifiPhyMode = WIFI_PHY_MODE_11G
     );
+    #endif
+
 
     // Event Function Declaration
     void onDebug(tListGenCbFnHaC1StrParam fn);      // Debug related events

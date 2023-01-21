@@ -55,10 +55,11 @@
 
 /* #region INTERNAL_DEPENDENCY */
 #include "HaCWifiManagerStringConst.h"
+
 /* #endregion */
 
 /* #region EXTERNAL_DEPENDENCY */
-#include <Arduino.h>
+#include "global.h"
 #include <ArduinoJson.h>
 #include <vector>
 /* #endregion */
@@ -130,7 +131,7 @@ public:
     void setEnableDHCPNetwork(bool enableSta = false, bool enableAp = false);
     bool getEnableDHCPNetwork(NetworkType netWorkType);
     void setHostName(const char *hostName);
-    String getHostName();
+    const char * getHostName();
 
     void clearWifiList();
     void addWifiList(const char *ssid, const char *pass);
@@ -162,7 +163,7 @@ private:
     bool _multiWifiEnable;
     bool _dhcpStaNetworkEnable;
     bool _dhcpApNetworkEnable;
-    String _hostName;
+    char *_hostName;
 
     tListGenCbFnHaC1StrParamSub _onDebugFn; // Function callback declaration for debug event
 

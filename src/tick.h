@@ -26,6 +26,7 @@
 
 /* #region EXTERNAL_DEPENDENCY */
 #include <Arduino.h>
+#include <memory>
 /* #endregion */
 
 /* #region INTERNAL_DEPENDENCY */
