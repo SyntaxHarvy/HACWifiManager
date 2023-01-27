@@ -74,6 +74,8 @@ void setup();
 ## Dependency
 1. ESP8266WiFi
 2. ArduinoJson
+3. Littlefs for esp8266
+4. LITTLEFS for esp32
 
 ## How to use
 
